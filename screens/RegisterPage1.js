@@ -14,7 +14,8 @@ const RegisterPage1 = () => {
   const navigation = useNavigation();
   // เพิ่ม state สำหรับเก็บข้อมูลผู้ใช้
   const db = firebase.firestore();
-  const todoRef = firebase.auth();
+  const auth = firebase.auth();
+  
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -23,16 +24,21 @@ const RegisterPage1 = () => {
 
   const [loading, setLoading] = useState(false);
 
-  useEffect(() => {
-    const unsubscribe = firebase.auth().onAuthStateChanged(user => {
-      if (user) {
-        navigation.replace("RegisterPage")
-        console.log('Register สำเร็จ');
+  const [gender, setGender] = useState("");
+  const [dateOfBirth, setDateOfBirth] = useState(null);
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
+
+  // useEffect(() => {
+  //   const unsubscribe = auth.onAuthStateChanged(user => {
+  //     if (user) {
+  //       navigation.replace("RegisterPage")
+  //       console.log('Register สำเร็จ');
         
-      }
-    })
-    return unsubscribe
-  }, [])
+  //     }
+  //   })
+  //   return unsubscribe
+  // }, [])
 
   // const handleSignUp = () => {
   //   firebase.auth()
@@ -45,7 +51,7 @@ const RegisterPage1 = () => {
   // }
 
   const handleSignUp = () => {
-    firebase.auth()
+    auth
       .createUserWithEmailAndPassword(email, password)
       .then(userCredentials => {
         const user = userCredentials.user;
@@ -56,6 +62,11 @@ const RegisterPage1 = () => {
           firstName: firstName,
           lastName: lastName,
           email: email,
+          gender: gender,
+          dateOfBirth: dateOfBirth,
+          weight: weight,
+          height: height,
+
         })
         .then(() => {
           console.log('User data added to Firestore');
@@ -65,6 +76,7 @@ const RegisterPage1 = () => {
         });
   
         console.log('Registered with:', user.email);
+        navigation.replace("RegisterPage")
       })
       .catch(error => alert(error.message));
   }
@@ -249,7 +261,7 @@ const RegisterPage1 = () => {
       <View style={styles.login}>
         <Pressable
           style={styles.pressable}
-          // onPress={() => navigation.navigate("LoginPage")}
+          onPress={() => navigation.navigate("LoginPage")}
         >
           <Text style={styles.text2}>
             <Text style={styles.text3}>

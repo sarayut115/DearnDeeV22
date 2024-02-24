@@ -12,12 +12,16 @@ import RNPickerSelect from 'react-native-picker-select';  // Import the PickerSe
 import moment from "moment";
 import 'moment/locale/th'; // เพิ่มบรรทัดนี้เพื่อตั้งค่า locale เป็นภาษาไทย
 moment.locale('th'); // เพิ่มบรรทัดนี้เพื่อตั้งค่า locale เป็นภาษาไทย
+import { firebase } from '../config';
 
 // other imports...
 
 
 const RegisterPage = () => {
   const navigation = useNavigation();
+
+  const db = firebase.firestore();
+  const auth = firebase.auth();
 
   const [gender, setGender] = useState("");
   const [showGenderDropdown, setShowGenderDropdown] = useState(false);
@@ -48,6 +52,31 @@ const RegisterPage = () => {
   //   setGender(itemValue);
   //   console.log(`Selected Gender: ${itemValue}`);
   // };
+
+  const updateDBfirebase = async () => {
+    try {
+      const user = auth.currentUser;
+  
+      if (user) {
+        // Update user profile in Firestore
+        await db.collection("users").doc(user.uid).update({
+          gender: gender,
+          dateOfBirth: dateOfBirth,
+          weight: weight,
+          height: height,
+        });
+  
+        console.log("User profile updated successfully!");
+        navigation.navigate("SuccessRegistration")
+      } else {
+        console.error("User not found");
+      }
+    } catch (error) {
+      console.error("Error updating user profile:", error.message);
+    }
+  };
+  
+
   return (
     <View style={styles.registerPage2}>
       <View style={styles.profileText}>
@@ -57,7 +86,8 @@ const RegisterPage = () => {
       </View>
       <Pressable
         style={[styles.button, styles.buttonLayout]}
-        onPress={() => navigation.navigate("SuccessRegistration")}
+        // onPress={() => navigation.navigate("SuccessRegistration")}
+        onPress={updateDBfirebase}
       >
         <LinearGradient
           style={[styles.btn, styles.labelGroupPosition]}
@@ -65,7 +95,9 @@ const RegisterPage = () => {
           colors={["#92a3fd", "#9dceff"]}
         />
         <View style={styles.next}>
-          <Text style={styles.next1}>ยืนยัน</Text>
+          <TouchableOpacity style={styles.next1}>
+            <Text style={styles.next1}>ยืนยัน</Text>
+          </TouchableOpacity>
           <Image
             style={[styles.iconlylightarrowRight2, styles.iconGroupLayout]}
             contentFit="cover"

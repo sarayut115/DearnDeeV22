@@ -4,10 +4,35 @@ import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, FontSize, Color, Border, Padding } from "../GlobalStyles";
+import { useState, useEffect } from "react"; // เพิ่ม import นี้
+import { firebase } from '../config';
+// import MainContainer from '../navigation/MainContainer';
 
 
 const SuccessRegistration = () => {
   const navigation = useNavigation();
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+
+  const [userDetails, setUserDetails] = useState(null);
+
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      const user = auth.currentUser;
+      if (user) {
+        try {
+          const userDoc = await db.collection("users").doc(user.uid).get();
+          const userData = userDoc.data();
+          setUserDetails(userData);
+        } catch (error) {
+          console.error("Error fetching user details:", error);
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [auth, db]);
+
 
   const handleSignOut = () => {
     auth
@@ -19,17 +44,22 @@ const SuccessRegistration = () => {
       .catch(error => alert(error.message))
   }
 
+  const goToMainContainer = () => {
+    navigation.navigate('MainContainer');
+
+  };
   return (
     <View style={styles.successRegistration}>
       <View style={styles.titleSection}>
-        
+
         <View style={styles.onboardTitle}>
           <Text style={[styles.welcome, styles.button1Typo]}>
-            ยินดีต้อนรับ 
+            ยินดีต้อนรับ   คุณ {userDetails ? userDetails.firstName : "Loading..."}
           </Text>
           <Text style={[styles.emailcurrent, styles.button1Typo]}>
-           {auth.currentUser?.email}
+            {auth.currentUser?.email}
           </Text>
+
         </View>
         <View style={styles.onboardDescription}>
           <Text style={[styles.text, styles.textPosition]}>
@@ -37,11 +67,11 @@ const SuccessRegistration = () => {
           </Text>
         </View>
       </View>
-      <LinearGradient
+      {/* <LinearGradient
         style={styles.button}
         locations={[0, 1]}
         colors={["#92a3fd", "#9dceff"]}
-      >
+      > */}
         {/* <Pressable
           style={styles.pressable}
           onPress={() => navigation.navigate("LoginPage")}
@@ -50,13 +80,26 @@ const SuccessRegistration = () => {
             ไปสู่หน้าหลัก
           </Text>
         </Pressable> */}
-        <TouchableOpacity
+
+        {/* <TouchableOpacity
           onPress={handleSignOut}
           style={styles.pressable}
         >
           <Text style={[styles.button1, styles.button1Typo]}>Sign out</Text>
+        </TouchableOpacity> */}
+
+        <TouchableOpacity style={styles.buttonLargeRegister} onPress={goToMainContainer}>
+          <LinearGradient
+            style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
+            locations={[0, 1]}
+            colors={["#92a3fd", "#9dceff"]}
+          />
+          <Text style={[styles.register, styles.text3FlexBox]}>
+            ไปสู่หน้าหลัก
+          </Text>
         </TouchableOpacity>
-      </LinearGradient>
+
+      {/* </LinearGradient> */}
       <Image
         style={styles.groupIcon}
         contentFit="cover"
@@ -67,6 +110,50 @@ const SuccessRegistration = () => {
 };
 
 const styles = StyleSheet.create({
+  buttonLargeRegister: {
+    top: 554,
+    left: 30,
+    shadowColor: "rgba(149, 173, 254, 0.3)",
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    shadowRadius: 22,
+    elevation: 22,
+    shadowOpacity: 1,
+    height: 60,
+    width: 315,
+    position: "absolute",
+  },
+  buttonLargeRegisterChild: {
+    borderRadius: Border.br_80xl,
+    backgroundColor: Color.blueLinear,
+  },
+  register: {
+    top: "30%",
+    left: "35%",
+    color: Color.whiteColor,
+    fontFamily: FontFamily.titleH4Bold,
+    fontWeight: "700",
+    lineHeight: 24,
+    fontSize: FontSize.textLargeTextRegular_size,
+    textAlign: "center",
+  },
+  text3FlexBox: {
+    textAlign: "center",
+    position: "absolute",
+  },
+
+
+  labelChildPosition: {
+    left: "0%",
+    bottom: "0%",
+    right: "0%",
+    top: "0%",
+    height: "100%",
+    position: "absolute",
+    width: "100%",
+  },
   textPosition: {
     textAlign: "center",
     left: 0,
@@ -76,7 +163,7 @@ const styles = StyleSheet.create({
   button1Typo: {
     fontFamily: FontFamily.titleH4Bold,
     fontWeight: "700",
-    
+
   },
   text: {
     fontSize: FontSize.textSmallTextRegular_size,
@@ -102,7 +189,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   emailcurrent: {
-    fontSize: FontSize.titleH4Bold_size,
+    fontSize: FontSize.titleH4Bold_size - 5,
     lineHeight: 30,
     color: Color.blackColor,
     textAlign: "center",

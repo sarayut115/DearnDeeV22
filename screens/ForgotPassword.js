@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Pressable } from "react-native";
+import { Text, StyleSheet, View, Pressable, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -44,7 +44,7 @@ const ForgotPassword = () => {
           ตรวจสอบอีเมลของคุณ จะส่งลิงค์รีเซ็ตรหัสผ่านไปให้คุณ
         </Text>
       </View>
-      <View style={styles.buttonLargeRegister}>
+      <TouchableOpacity style={styles.buttonLargeRegister}>
         <LinearGradient
           style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
           locations={[0, 1]}
@@ -53,7 +53,7 @@ const ForgotPassword = () => {
         <Text style={[styles.register, styles.text3FlexBox]}>
           ส่งลิ้งรีเซ็ตรหัสผ่าน
         </Text>
-      </View>
+      </TouchableOpacity>
       <Pressable
         style={styles.arrowLeft}
         onPress={() => navigation.navigate("LoginPage")}

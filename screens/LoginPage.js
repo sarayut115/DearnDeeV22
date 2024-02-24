@@ -5,10 +5,12 @@ import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, FontSize, Border, Color } from "../GlobalStyles";
 
-import { signInWithEmailAndPassword } from "firebase/auth";
+import {firebase} from '../config';
 
 const LoginPage = () => {
   const navigation = useNavigation();
+  const auth = firebase.auth();
+  const db = firebase.firestore();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
