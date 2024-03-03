@@ -42,7 +42,7 @@ const App = () => {
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
               name="WelcomeScreen"
-              component={WelcomeScreen}
+              component={RegisterPage1}
               // component={Home}
               options={{ headerShown: false }}
             />

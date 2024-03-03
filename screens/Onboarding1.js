@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Pressable } from "react-native";
+import { Text, StyleSheet, View, Pressable, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontSize, FontFamily, Color, Border } from "../GlobalStyles";
@@ -19,7 +19,7 @@ const Onboarding1 = () => {
 ไฟฟ้าด้วยเซ็นเซอร์ไร้สาย เพื่อปรับเปลี่ยนค่าต่างๆ ได้
 ตามความต้องการ`}</Text>
       </View>
-      <Pressable
+      <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Onboarding")}
       >
@@ -28,7 +28,13 @@ const Onboarding1 = () => {
           contentFit="cover"
           source={require("../assets/typeonboarding--3.png")}
         />
-      </Pressable>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.skipButton}
+        onPress={() => navigation.navigate("LoginPage")} // หรือตามที่คุณต้องการ
+      >
+        <Text style={styles.skipButtonText}>ข้าม</Text>
+      </TouchableOpacity>
       <View style={styles.frame}>
         <Image
           style={[styles.groupIcon, styles.iconLayout]}
@@ -108,9 +114,9 @@ const styles = StyleSheet.create({
     left: "12.53%",
   },
   frame: {
-    top: -2,
-    width: 375,
-    height: 439,
+    top: -35,
+    width: 395,
+    height: 465,
     left: 0,
     position: "absolute",
     overflow: "hidden",
@@ -122,6 +128,17 @@ const styles = StyleSheet.create({
     height: 812,
     overflow: "hidden",
     width: "100%",
+  },
+  skipButton: {
+    position: "absolute",
+    bottom: 70,
+    left: 30,
+    padding: 10,
+  },
+  skipButtonText: {
+    fontSize: FontSize.textLargeTextRegular_size,
+    color: Color.gray1,
+    fontFamily: FontFamily.titleH4Bold,
   },
 });
 

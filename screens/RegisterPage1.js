@@ -1,21 +1,25 @@
-import * as React from "react";
-import { Text, StyleSheet, View, Pressable, TextInput, Keyboard,Alert } from "react-native";
+import { Text, StyleSheet, View, Pressable, TextInput, Keyboard, Alert, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color, FontSize, Border } from "../GlobalStyles";
-import { useState, useEffect } from "react"; // เพิ่ม import นี้
+import React, { useState, useEffect, useRef } from "react";
 // import { auth, db } from '../firebase';
-import {firebase} from '../config';
+import { firebase } from '../config';
 
 
 
 const RegisterPage1 = () => {
   const navigation = useNavigation();
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+  const nameInputRef = useRef(null);
+  const lastnameInputRef = useRef(null);
+
   // เพิ่ม state สำหรับเก็บข้อมูลผู้ใช้
   const db = firebase.firestore();
   const auth = firebase.auth();
-  
+
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
@@ -34,7 +38,7 @@ const RegisterPage1 = () => {
   //     if (user) {
   //       navigation.replace("RegisterPage")
   //       console.log('Register สำเร็จ');
-        
+
   //     }
   //   })
   //   return unsubscribe
@@ -56,7 +60,7 @@ const RegisterPage1 = () => {
       .then(userCredentials => {
         const user = userCredentials.user;
         // console.log('Registered with:', user.email);
-  
+
         // เพิ่มข้อมูลลง Firestore
         db.collection("users").doc(user.uid).set({
           firstName: firstName,
@@ -68,19 +72,19 @@ const RegisterPage1 = () => {
           height: height,
 
         })
-        .then(() => {
-          console.log('User data added to Firestore');
-        })
-        .catch(error => {
-          console.error('Error adding user data to Firestore:', error);
-        });
-  
+          .then(() => {
+            console.log('User data added to Firestore');
+          })
+          .catch(error => {
+            console.error('Error adding user data to Firestore:', error);
+          });
+
         console.log('Registered with:', user.email);
         navigation.replace("RegisterPage")
       })
       .catch(error => alert(error.message));
   }
- 
+
 
   // const handleSignUp = () => {
   //   if (email && email.length > 0){
@@ -111,9 +115,22 @@ const RegisterPage1 = () => {
       <View style={[styles.labelSection, styles.labelSectionPosition]}>
         <View style={[styles.label, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
-            <View style={[styles.labelBgChild, styles.childBorder]} />
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childLayout]}
+              onPress={() => {
+                nameInputRef.current.focus();
+              }}
+            >
+              {/* ... ข้อมูลที่อยู่ใน TouchableOpacity ... */}
+            </TouchableOpacity>
           </View>
-          <View style={[styles.placeholder, styles.placeholderPosition1]}>
+          {/* <View style={[styles.placeholder, styles.placeholderPosition1]}> */}
+          <TouchableOpacity
+              style={[styles.placeholder, styles.placeholderPosition1]}
+              onPress={() => {
+                nameInputRef.current.focus();
+              }}
+            >
             <Image
               style={[
                 styles.iconlylightOutlineprofile,
@@ -123,18 +140,32 @@ const RegisterPage1 = () => {
               source={require("../assets/iconlylightoutlineprofile.png")}
             />
             <TextInput
+              ref={nameInputRef}
               style={[styles.firstName, styles.nameTypo]}
               placeholder="ชื่อ"
               value={firstName}
               onChangeText={(text) => setFirstName(text)}
             />
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={[styles.label2, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
-            <View style={[styles.labelBgChild, styles.childBorder]} />
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childLayout]}
+              onPress={() => {
+                lastnameInputRef.current.focus();
+              }}
+            >
+              {/* ... ข้อมูลที่อยู่ใน TouchableOpacity ... */}
+            </TouchableOpacity>
           </View>
-          <View style={[styles.placeholder2, styles.placeholderPosition1]}>
+          {/* <View style={[styles.placeholder2, styles.placeholderPosition1]}> */}
+          <TouchableOpacity
+              style={[styles.placeholder2, styles.placeholderPosition1]}
+              onPress={() => {
+                lastnameInputRef.current.focus();
+              }}
+            >
             <Image
               style={[
                 styles.iconlylightOutlineprofile1,
@@ -144,54 +175,83 @@ const RegisterPage1 = () => {
               source={require("../assets/iconlylightoutlineprofile.png")}
             />
             <TextInput
+              ref={lastnameInputRef}
               style={[styles.lastName, styles.nameTypo]}
               placeholder="นามสกุล"
               value={lastName}
               onChangeText={(text) => setLastName(text)}
             />
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={[styles.label1, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
-            <View style={[styles.labelBgChild, styles.childBorder]} />
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childLayout]}
+              onPress={() => {
+                emailInputRef.current.focus();
+              }}
+            >
+              {/* ... ข้อมูลที่อยู่ใน TouchableOpacity ... */}
+            </TouchableOpacity>
           </View>
-          <View style={[styles.placeholder1, styles.placeholderPosition]}>
+          {/* <View style={[styles.placeholder1, styles.placeholderPosition]}> */}
+          <TouchableOpacity
+              style={[styles.placeholder1, styles.placeholderPosition]}
+              onPress={() => {
+                emailInputRef.current.focus();
+              }}
+            >
             <Image
-              style={[styles.iconlylightmessage, styles.hidePasswordIconLayout]}
+              style={[styles.iconlylightmessage, styles.IconLayoutemail]}
               contentFit="cover"
               source={require("../assets/iconlylightmessage.png")}
             />
             <TextInput
+              ref={emailInputRef}
               style={[styles.email, styles.nameTypo]}
               placeholder="อีเมล"
               value={email}
               onChangeText={(text) => setEmail(text)}
             />
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={[styles.label3, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
-            <View style={[styles.labelBgChild, styles.childBorder]} />
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childLayout]}
+              onPress={() => {
+                passwordInputRef.current.focus();
+              }}
+            >
+              {/* ... ข้อมูลที่อยู่ใน TouchableOpacity ... */}
+            </TouchableOpacity>
           </View>
           {/* <Image
             style={[styles.hidePasswordIcon, styles.hidePasswordIconLayout]}
             contentFit="cover"
             source={require("../assets/hidepassword.png")}
           /> */}
-          <View style={[styles.placeholder3, styles.placeholderPosition]}>
+          {/* <View style={[styles.placeholder3, styles.placeholderPosition]}> */}
+          <TouchableOpacity
+              style={[styles.placeholder3, styles.placeholderPosition]}
+              onPress={() => {
+                passwordInputRef.current.focus();
+              }}
+            >
             <Image
-              style={[styles.iconlylightmessage, styles.hidePasswordIconLayout]}
+              style={[styles.iconlylightmessage, styles.IconLayoutpassword]}
               contentFit="cover"
               source={require("../assets/iconlylightlock.png")}
             />
             <TextInput
+              ref={passwordInputRef}
               style={styles.password}
               placeholder="รหัสผ่าน"
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={(text) => setPassword(text)}
             />
-            <Pressable
+            <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
               style={{ position: "absolute", right: 10, top: 10 }}
             >
@@ -204,8 +264,8 @@ const RegisterPage1 = () => {
                     : require("../assets/hidepassword.png")
                 }
               />
-            </Pressable>
-          </View>
+            </TouchableOpacity>
+          </TouchableOpacity>
         </View>
         <View style={styles.privacyPolicy}>
           <View style={[styles.privacyPolicyChild, styles.childBorder]} />
@@ -219,7 +279,7 @@ const RegisterPage1 = () => {
           </Text>
         </View>
       </View>
-      <Pressable
+      <TouchableOpacity
         style={[styles.buttonLargeRegister, styles.labelSectionPosition]}
         // onPress={() => navigation.navigate("RegisterPage")}
         onPress={handleSignUp}
@@ -231,7 +291,7 @@ const RegisterPage1 = () => {
         />
         <Text style={[styles.register, styles.textTypo]}>{loading ? "กำลังลงทะเบียน.." : "ลงทะเบียน"}</Text>
 
-      </Pressable>
+      </TouchableOpacity>
       <View style={styles.or}>
         <Text style={styles.text1}>หรือ</Text>
         <Image
@@ -259,7 +319,7 @@ const RegisterPage1 = () => {
         </View>
       </View>
       <View style={styles.login}>
-        <Pressable
+        <TouchableOpacity
           style={styles.pressable}
           onPress={() => navigation.navigate("LoginPage")}
         >
@@ -270,18 +330,18 @@ const RegisterPage1 = () => {
             </Text>
             <Text style={[styles.text6, styles.textTypo]}>เข้าสู่ระบบ</Text>
           </Text>
-        </Pressable>
+        </TouchableOpacity>
       </View>
-      <Pressable
+      <TouchableOpacity
         style={styles.arrowLeft}
-        // onPress={() => navigation.navigate("LoginPage")}
+      // onPress={() => navigation.navigate("LoginPage")}
       >
         <Image
           style={[styles.icon, styles.iconlylightLayout]}
           contentFit="cover"
           source={require("../assets/arrowleft.png")}
         />
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -376,6 +436,18 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   hidePasswordIconLayout: {
+    width: 23,
+    height: 23,
+    position: "absolute",
+    // backgroundColor:'red'
+  },
+  IconLayoutemail: {
+    width: 18,
+    height: 18,
+    position: "absolute",
+
+  },
+  IconLayoutpassword: {
     width: 18,
     height: 18,
     position: "absolute",
@@ -537,6 +609,7 @@ const styles = StyleSheet.create({
   placeholder: {
     width: "75%",
     right: "81.9%",
+    // backgroundColor:"red"
   },
   label: {
     top: 0,
@@ -554,6 +627,7 @@ const styles = StyleSheet.create({
   },
   placeholder1: {
     width: 240,
+    // backgroundColor:"red"
   },
   label1: {
     top: 126,
@@ -573,6 +647,7 @@ const styles = StyleSheet.create({
   placeholder2: {
     width: "75%",
     right: "73.33%",
+    // backgroundColor:"red"
   },
 
   placeholderPosition1: {
@@ -586,8 +661,8 @@ const styles = StyleSheet.create({
     top: 63,
   },
   hidePasswordIcon: {
-    left: 60,
-    top: -7,
+    left: 50,
+    top: -10,
   },
   password: {
     left: "15%",
@@ -598,6 +673,7 @@ const styles = StyleSheet.create({
   },
   placeholder3: {
     width: 220,
+    // backgroundColor:"red"
   },
   label3: {
     top: 189,

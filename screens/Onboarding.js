@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Pressable } from "react-native";
+import { Text, StyleSheet, View, Pressable, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontSize, FontFamily, Color, Border } from "../GlobalStyles";
@@ -14,7 +14,7 @@ const Onboarding = () => {
           กลับมาเดินได้อีกครั้ง
         </Text>
       </View>
-      <Pressable
+      <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("LoginPage")}
       >
@@ -23,7 +23,7 @@ const Onboarding = () => {
           contentFit="cover"
           source={require("../assets/typeonboarding--4.png")}
         />
-      </Pressable>
+      </TouchableOpacity>
       <Image
         style={[styles.frameIcon, styles.textPosition]}
         contentFit="cover"
@@ -76,8 +76,8 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   frameIcon: {
-    width: 375,
-    height: 422,
+    width: 392,
+    height: 447,
     position: "absolute",
     overflow: "hidden",
   },

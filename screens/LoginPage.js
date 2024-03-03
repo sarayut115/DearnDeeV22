@@ -1,11 +1,11 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Text, StyleSheet, View, Pressable, TextInput, Alert, TouchableOpacity } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, FontSize, Border, Color } from "../GlobalStyles";
 
-import {firebase} from '../config';
+import { firebase } from '../config';
 
 const LoginPage = () => {
   const navigation = useNavigation();
@@ -14,6 +14,10 @@ const LoginPage = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+
+  const emailInputRef = useRef(null);
+  const passwordInputRef = useRef(null);
+
 
   const handleForgotPasswordPress = () => {
     // นำทางไปยังหน้า ForgotPassword
@@ -74,15 +78,23 @@ const LoginPage = () => {
         {/* ช่องกรอกอีเมล */}
         <View style={[styles.label, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
-            <View style={[styles.labelBgChild, styles.childLayout]} />
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childLayout]}
+              onPress={() => {
+                emailInputRef.current.focus(); // focus ที่ TextInput ของอีเมล
+              }}
+            >
+              {/* ... ข้อมูลที่อยู่ใน TouchableOpacity ... */}
+            </TouchableOpacity>
           </View>
           <View style={[styles.placeholder, styles.placeholderPosition]}>
             <Image
-              style={[styles.iconlylightmessage, styles.hidePasswordIconLayout]}
+              style={[styles.iconlylightmessage, styles.IconLayoutemail]}
               contentFit="cover"
               source={require("../assets/iconlylightmessage.png")}
             />
             <TextInput
+              ref={emailInputRef}
               style={styles.email}
               placeholder="อีเมล"
               value={email}
@@ -94,7 +106,14 @@ const LoginPage = () => {
         {/* ช่องกรอกรหัสผ่าน */}
         <View style={[styles.label1, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
-            <View style={[styles.labelBgChild, styles.childLayout]} />
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childLayout]}
+              onPress={() => {
+                passwordInputRef.current.focus(); // focus ที่ TextInput ของรหัสผ่าน
+              }}
+            >
+              {/* ... ข้อมูลที่อยู่ใน TouchableOpacity ... */}
+            </TouchableOpacity>
           </View>
           {/* <Image
             style={[styles.hidePasswordIcon, styles.hidePasswordIconLayout]}
@@ -103,18 +122,19 @@ const LoginPage = () => {
           /> */}
           <View style={[styles.placeholder1, styles.placeholderPosition]}>
             <Image
-              style={[styles.iconlylightmessage, styles.hidePasswordIconLayout]}
+              style={[styles.iconlylightmessage, styles.IconLayoutpassword]}
               contentFit="cover"
               source={require("../assets/iconlylightlock.png")}
             />
             <TextInput
+              ref={passwordInputRef}
               style={styles.password}
               placeholder="รหัสผ่าน"
               secureTextEntry={!showPassword}
               value={password}
               onChangeText={(text) => setPassword(text)}
             />
-            <Pressable
+            <TouchableOpacity
               onPress={() => setShowPassword(!showPassword)}
               style={{ position: "absolute", right: 10, top: 10 }}
             >
@@ -127,7 +147,7 @@ const LoginPage = () => {
                     : require("../assets/hidepassword.png")
                 }
               />
-            </Pressable>
+            </TouchableOpacity>
           </View>
         </View>
         <View style={[styles.forgetPassword, styles.registerTextLayout]}>
@@ -137,7 +157,7 @@ const LoginPage = () => {
         </View>
       </View>
       {/* ปุ่มเข้าสู่ระบบ */}
-      <Pressable
+      <TouchableOpacity
         style={[styles.buttonLogin, styles.buttonLoginPosition]}
         onPress={handleLogin}
       >
@@ -154,7 +174,7 @@ const LoginPage = () => {
           />
           <Text style={[styles.login, styles.textTypo]}>เข้าสู่ระบบ</Text>
         </View>
-      </Pressable>
+      </TouchableOpacity>
       <View style={styles.or}>
         <Text style={[styles.text2, styles.text2Layout]}>หรือ</Text>
       </View>
@@ -171,7 +191,7 @@ const LoginPage = () => {
           </Text>
         </View>
       </View>
-      <Pressable
+      <TouchableOpacity
         style={[styles.registerText, styles.registerTextLayout]}
         onPress={() => navigation.navigate("RegisterPage1")}
       >
@@ -179,7 +199,7 @@ const LoginPage = () => {
           <Text style={styles.text4}>{`ยังไม่มีบัญชีใช่หรือไม่? `}</Text>
           <Text style={[styles.text5, styles.textTypo]}>ลงทะเบียน</Text>
         </Text>
-      </Pressable>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -238,20 +258,39 @@ const styles = StyleSheet.create({
     textAlign: "left",
     position: "absolute",
 
+
   },
   labelLayout: {
     height: 48,
     width: 315,
     left: 0,
     position: "absolute",
+    // backgroundColor: 'yellow'
   },
   placeholderPosition: {
     left: 15,
     top: 15,
     height: 18,
     position: "absolute",
+    // backgroundColor: 'red'
+  },
+  hidePasswordIcon: {
+    left: 50,
+    top: -10,
   },
   hidePasswordIconLayout: {
+    width: 23,
+    height: 23,
+    position: "absolute",
+    // backgroundColor:'red'
+  },
+  IconLayoutemail: {
+    width: 18,
+    height: 18,
+    position: "absolute",
+
+  },
+  IconLayoutpassword: {
     width: 18,
     height: 18,
     position: "absolute",
@@ -423,6 +462,7 @@ const styles = StyleSheet.create({
   },
   labelBgChild: {
     backgroundColor: Color.borderColor,
+    // backgroundColor: 'blue',
     borderStyle: "solid",
     borderColor: Color.borderColor,
     borderWidth: 1,
@@ -452,10 +492,6 @@ const styles = StyleSheet.create({
   },
   label: {
     top: 0,
-  },
-  hidePasswordIcon: {
-    left: 60,
-    top: -7,
   },
   password: {
     left: "15%",

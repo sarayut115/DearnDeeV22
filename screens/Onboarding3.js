@@ -1,8 +1,9 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Pressable } from "react-native";
+import { Text, StyleSheet, View, Pressable, TouchableOpacity } from "react-native";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { FontSize, FontFamily, Color, Border } from "../GlobalStyles";
+import { LinearGradient } from "expo-linear-gradient";
 
 const Onboarding3 = () => {
   const navigation = useNavigation();
@@ -17,7 +18,7 @@ const Onboarding3 = () => {
           เป็นอุปกรณ์ที่สามารถส่งกระแสไฟฟ้าไปกระตุ้นเส้นประสาทที่สั่งการให้กล้ามเนื้อหดตัวโดยเฉพาะเส้นประสาทที่สั่งการมาที่ปลายเท้า
         </Text>
       </View>
-      <Pressable
+      <TouchableOpacity
         style={styles.button}
         onPress={() => navigation.navigate("Onboarding2")}
       >
@@ -26,7 +27,14 @@ const Onboarding3 = () => {
           contentFit="cover"
           source={require("../assets/typeonboarding--1.png")}
         />
-      </Pressable>
+      </TouchableOpacity>
+      <TouchableOpacity
+        style={styles.skipButton}
+        onPress={() => navigation.navigate("LoginPage")} // หรือตามที่คุณต้องการ
+      >
+        <Text style={styles.skipButtonText}>ข้าม</Text>
+      </TouchableOpacity>
+
       <View style={styles.frame}>
         <Image
           style={[styles.groupIcon, styles.iconLayout]}
@@ -107,12 +115,13 @@ const styles = StyleSheet.create({
     left: "23.47%",
   },
   frame: {
-    width: 375,
-    height: 406,
+    width: 392,
+    height: 431,
     left: 0,
     top: 0,
     position: "absolute",
     overflow: "hidden",
+    // backgroundColor:'red'
   },
   onboarding1: {
     borderRadius: Border.br_21xl,
@@ -122,6 +131,19 @@ const styles = StyleSheet.create({
     overflow: "hidden",
     width: "100%",
   },
+
+  skipButton: {
+    position: "absolute",
+    bottom: 70,
+    left: 30,
+    padding: 10,
+  },
+  skipButtonText: {
+    fontSize: FontSize.textLargeTextRegular_size,
+    color: Color.gray1,
+    fontFamily: FontFamily.titleH4Bold,
+  },
+
 });
 
 export default Onboarding3;
