@@ -1,11 +1,11 @@
 import * as React from "react";
-import { Text, StyleSheet, View, Pressable, TextInput, TouchableWithoutFeedback, TouchableOpacity, } from "react-native";
+import { Text, StyleSheet, View, Pressable, TextInput, TouchableWithoutFeedback, TouchableOpacity, Keyboard  } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import { Image } from "expo-image";
 import { useNavigation } from "@react-navigation/native";
 import { Border, Color, FontSize, FontFamily } from "../GlobalStyles";
 import DateTimePicker from '@react-native-community/datetimepicker';
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Moment } from "moment/moment";
 import { Picker } from "@react-native-picker/picker";
 import RNPickerSelect from 'react-native-picker-select';  // Import the PickerSelect component
@@ -19,6 +19,10 @@ import { firebase } from '../config';
 
 const RegisterPage = () => {
   const navigation = useNavigation();
+  const genderInputRef = useRef(null);
+
+  const weightInputRef = useRef(null);
+  const heightInputRef = useRef(null);
 
   const db = firebase.firestore();
   const auth = firebase.auth();
@@ -31,12 +35,27 @@ const RegisterPage = () => {
 
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+  
+
+  // const onDateChange = (event, selectedDate) => {
+  //   const currentDate = selectedDate || dateOfBirth;
+  //   setShowDatePicker(false);
+  //   setDateOfBirth(currentDate);
+  // };
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || dateOfBirth;
-    setShowDatePicker(false);
+    const dayChanged = currentDate.getDate() !== dateOfBirth?.getDate();
+
+    if (dayChanged) {
+      setShowDatePicker(false);
+    }
+
     setDateOfBirth(currentDate);
   };
+
+
+
 
   const showDatepicker = () => {
     setShowDatePicker(true);
@@ -46,6 +65,7 @@ const RegisterPage = () => {
     { label: "ชาย", value: "ชาย" },
     { label: "หญิง", value: "หญิง" },
     { label: "อื่นๆ", value: "อื่นๆ" },
+    { label: "ไม่ระบุ", value: "ไม่ระบุ" },
   ];
 
   // const handleGenderChange = (itemValue) => {
@@ -56,7 +76,7 @@ const RegisterPage = () => {
   const updateDBfirebase = async () => {
     try {
       const user = auth.currentUser;
-  
+
       if (user) {
         // Update user profile in Firestore
         await db.collection("users").doc(user.uid).update({
@@ -65,7 +85,7 @@ const RegisterPage = () => {
           weight: weight,
           height: height,
         });
-  
+
         console.log("User profile updated successfully!");
         navigation.navigate("SuccessRegistration")
       } else {
@@ -75,7 +95,7 @@ const RegisterPage = () => {
       console.error("Error updating user profile:", error.message);
     }
   };
-  
+
 
   return (
     <View style={styles.registerPage2}>
@@ -116,13 +136,31 @@ const RegisterPage = () => {
           onPress={() => setShowGenderDropdown(!showGenderDropdown)}
         >
           <View style={[styles.labelBg, styles.labelGroupPosition]}>
-            <View style={[styles.labelBgChild, styles.childPosition]} />
+            {/* <TouchableOpacity style={[styles.labelBgChild, styles.childPosition]} /> */}
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childPosition]}
+              onPress={() => genderInputRef.current.togglePicker()}
+            />
+
           </View>
-          <Image
+          {/* <Image
             style={styles.dropdownIcon}
             contentFit="cover"
             source={require("../assets/dropdown.png")}
-          />
+          /> */}
+
+          <TouchableOpacity
+            style={styles.dropdownIconWrapper}
+            onPress={() => genderInputRef.current.togglePicker()}
+          >
+            <Image
+              style={styles.dropdownIcon}
+              contentFit="cover"
+              source={require("../assets/dropdown.png")}
+            />
+          </TouchableOpacity>
+
+
           <View style={[styles.placeholder, styles.placeholderPosition]}>
             {/* <Text style={[styles.chooseGender, styles.yourPosition]}>
               {gender || "เลือกเพศ"}
@@ -143,7 +181,17 @@ const RegisterPage = () => {
               // </Picker>
               
             )} */}
+            {/* <RNPickerSelect
+              onValueChange={(itemValue) => setGender(itemValue)}
+              items={genderOptions}
+              placeholder={{ label: "เลือกเพศ", value: null }}
+              style={{
+                inputIOS: [styles.pickerInput, gender ? { color: 'black' } : { color: 'gray' }],
+                inputAndroid: [styles.pickerInput, gender ? { color: 'black' } : { color: 'gray' }],
+              }}
+            /> */}
             <RNPickerSelect
+              ref={genderInputRef}
               onValueChange={(itemValue) => setGender(itemValue)}
               items={genderOptions}
               placeholder={{ label: "เลือกเพศ", value: null }}
@@ -152,6 +200,7 @@ const RegisterPage = () => {
                 inputAndroid: [styles.pickerInput, gender ? { color: 'black' } : { color: 'gray' }],
               }}
             />
+
             {/* <RNPickerSelect
               onValueChange={handleGenderChange} // Update the gender state when value changes
               items={genderOptions}
@@ -168,7 +217,11 @@ const RegisterPage = () => {
         </Pressable>
         <View style={[styles.label1, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelGroupPosition]}>
-            <View style={[styles.labelBgChild, styles.childPosition]} />
+            {/* <TouchableOpacity style={[styles.labelBgChild, styles.childPosition]} /> */}
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childPosition]}
+              onPress={showDatepicker}
+            ></TouchableOpacity>
           </View>
           <TouchableOpacity style={[styles.placeholder1, styles.placeholderPosition]} onPress={showDatepicker}>
             {/* <Text style={[styles.dateOfBirth, styles.yourPosition]}>
@@ -206,7 +259,12 @@ const RegisterPage = () => {
         </View>
         <View style={[styles.label2, styles.labelLayout]}>
           <View style={[styles.labelBg2, styles.labelGroupPosition]}>
-            <View style={[styles.labelBgChild, styles.childPosition]} />
+            {/* <TouchableOpacity style={[styles.labelBgChild, styles.childPosition]} /> */}
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childPosition]}
+              onPress={() => weightInputRef.current.focus()}
+            />
+
           </View>
           <View style={[styles.buttonKg, styles.labelGroupPosition]}>
             <LinearGradient
@@ -216,14 +274,17 @@ const RegisterPage = () => {
             />
             <Text style={[styles.kg, styles.kgTypo]}>KG</Text>
           </View>
-          <View style={[styles.placeholder2, styles.placeholderPosition]}>
+          <TouchableOpacity
+            style={[styles.placeholder2, styles.placeholderPosition]}
+            onPress={() => weightInputRef.current.focus()}
+          >
             {/* <Text style={[styles.yourWeight, styles.yourPosition]}>
               น้ำหนักของคุณ
             </Text> */}
             <TextInput
-              style={[styles.yourHeight, styles.yourPosition, weight ? { color: 'black' } : { color: 'gray' }]}
+              ref={weightInputRef}
+              style={[styles.yourWeight, styles.yourPosition, weight ? { color: 'black' } : { color: 'gray' }]}
               placeholder="น้ำหนักของคุณ"
-              // keyboardType="numeric"  // Set keyboardType to 'numeric'
               value={weight}
               onChangeText={(text) => setWeight(text)}
             />
@@ -232,11 +293,15 @@ const RegisterPage = () => {
               contentFit="cover"
               source={require("../assets/weightscale-11.png")}
             />
-          </View>
+          </TouchableOpacity>
         </View>
         <View style={[styles.label3, styles.labelLayout]}>
           <View style={[styles.labelBg2, styles.labelGroupPosition]}>
-            <View style={[styles.labelBgChild, styles.childPosition]} />
+            {/* <TouchableOpacity style={[styles.labelBgChild, styles.childPosition]} /> */}
+            <TouchableOpacity
+              style={[styles.labelBgChild, styles.childPosition]}
+              onPress={() => heightInputRef.current.focus()}
+            />
           </View>
           <View style={[styles.buttonKg, styles.labelGroupPosition]}>
             <LinearGradient
@@ -246,23 +311,27 @@ const RegisterPage = () => {
             />
             <Text style={[styles.cm, styles.kgTypo]}>CM</Text>
           </View>
-          <View style={[styles.placeholder3, styles.placeholderPosition]}>
+          <TouchableOpacity
+            style={[styles.placeholder3, styles.placeholderPosition]}
+            onPress={() => heightInputRef.current.focus()}
+          >
             {/* <Text style={[styles.yourHeight, styles.yourPosition]}>
               <Text style={styles.text2}>ส่วนสูงของคุณ</Text>
             </Text> */}
             <TextInput
-              style={[styles.yourWeight, styles.yourPosition, height ? { color: 'black' } : { color: 'gray' }]}
+              ref={heightInputRef}
+              style={[styles.yourHeight, styles.yourPosition, height ? { color: 'black' } : { color: 'gray' }]}
               placeholder="ส่วนสูงของคุณ"
-              // keyboardType="numeric"  // Set keyboardType to 'numeric'
               value={height}
               onChangeText={(text) => setHeight(text)}
             />
+
             <Image
               style={[styles.iconlylightswap, styles.iconGroupLayout]}
               contentFit="cover"
               source={require("../assets/iconlylightswap.png")}
             />
-          </View>
+          </TouchableOpacity>
         </View>
       </View>
       <View style={styles.man2}>
@@ -349,6 +418,14 @@ const RegisterPage = () => {
 
 
 const styles = StyleSheet.create({
+  dropdownIconWrapper: {
+    position: 'absolute',
+    right: 0, // Adjust the position based on your design
+    top: 0,   // Adjust the position based on your design
+    width: "100%", // Adjust the width based on your design
+    height: "100%", // Adjust the height based on your design
+  },
+
   pickerInput: {
     left: "12%",
     fontFamily: FontFamily.textSmallTextRegular,
@@ -519,6 +596,7 @@ const styles = StyleSheet.create({
   },
   labelBgChild: {
     backgroundColor: Color.borderColor,
+    // backgroundColor: 'yellow'
   },
   labelBg: {
     left: "0%",
@@ -540,6 +618,7 @@ const styles = StyleSheet.create({
     maxWidth: "100%",
     position: "absolute",
     overflow: "hidden",
+    // backgroundColor: 'green'
   },
   chooseGender: {
     left: "38.89%",
@@ -552,10 +631,12 @@ const styles = StyleSheet.create({
     bottom: "0%",
     top: "0%",
     height: "100%",
+
   },
   placeholder: {
     width: "80%",
     right: "72.38%",
+    // backgroundColor: 'red'
   },
   label: {
     top: 0,
@@ -616,6 +697,7 @@ const styles = StyleSheet.create({
   placeholder2: {
     width: "75%",
     right: "63.17%",
+    // backgroundColor: 'red'
 
   },
   label2: {

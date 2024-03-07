@@ -1,4 +1,4 @@
-import { Text, StyleSheet, View, Pressable, TextInput, Keyboard, Alert, TouchableOpacity } from "react-native";
+import { Text, StyleSheet, View, Pressable, TextInput, Keyboard, Alert, TouchableOpacity, TouchableWithoutFeedback } from "react-native";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
@@ -6,6 +6,7 @@ import { FontFamily, Color, FontSize, Border } from "../GlobalStyles";
 import React, { useState, useEffect, useRef } from "react";
 // import { auth, db } from '../firebase';
 import { firebase } from '../config';
+import { CheckBox } from 'react-native-elements';
 
 
 
@@ -19,6 +20,7 @@ const RegisterPage1 = () => {
   // เพิ่ม state สำหรับเก็บข้อมูลผู้ใช้
   const db = firebase.firestore();
   const auth = firebase.auth();
+  const realtimeDB = firebase.database(); // Add this line
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -32,6 +34,8 @@ const RegisterPage1 = () => {
   const [dateOfBirth, setDateOfBirth] = useState(null);
   const [weight, setWeight] = useState("");
   const [height, setHeight] = useState("");
+
+  const [isChecked, setChecked] = useState(false);
 
   // useEffect(() => {
   //   const unsubscribe = auth.onAuthStateChanged(user => {
@@ -55,11 +59,22 @@ const RegisterPage1 = () => {
   // }
 
   const handleSignUp = () => {
+    // ตรวจสอบว่า checkbox ถูกติ๊กหรือไม่
+    if (!isChecked) {
+      // ถ้าไม่ติ๊กให้แสดง Alert และหยุดการลงทะเบียน
+      Alert.alert('กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งานของเรา');
+      return;
+    }
     auth
       .createUserWithEmailAndPassword(email, password)
       .then(userCredentials => {
         const user = userCredentials.user;
         // console.log('Registered with:', user.email);
+
+        // Add email to Realtime Database
+        database.ref('emails').push({
+          email: email,
+        });
 
         // เพิ่มข้อมูลลง Firestore
         db.collection("users").doc(user.uid).set({
@@ -84,6 +99,45 @@ const RegisterPage1 = () => {
       })
       .catch(error => alert(error.message));
   }
+
+  // const handleSignUp = () => {
+  //   if (!isChecked) {
+  //     Alert.alert('กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งานของเรา');
+  //     return;
+  //   }
+  
+  //   auth.createUserWithEmailAndPassword(email, password)
+  //     .then(userCredentials => {
+  //       const user = userCredentials.user;
+  
+  //       // Add email to Realtime Database
+  //       realtimeDB.ref('emails').push({
+  //         email: email,
+  //       });
+  
+  //       // Add user data to Firestore
+  //       db.collection("users").doc(user.uid).set({
+  //         firstName: firstName,
+  //         lastName: lastName,
+  //         email: email,
+  //         gender: gender,
+  //         dateOfBirth: dateOfBirth,
+  //         weight: weight,
+  //         height: height,
+  //       })
+  //       .then(() => {
+  //         console.log('User data added to Firestore');
+  //       })
+  //       .catch(error => {
+  //         console.error('Error adding user data to Firestore:', error);
+  //       });
+  
+  //       console.log('Registered with:', user.email);
+  //       navigation.replace("RegisterPage");
+  //     })
+  //     .catch(error => alert(error.message));
+  // }
+  
 
 
   // const handleSignUp = () => {
@@ -126,11 +180,11 @@ const RegisterPage1 = () => {
           </View>
           {/* <View style={[styles.placeholder, styles.placeholderPosition1]}> */}
           <TouchableOpacity
-              style={[styles.placeholder, styles.placeholderPosition1]}
-              onPress={() => {
-                nameInputRef.current.focus();
-              }}
-            >
+            style={[styles.placeholder, styles.placeholderPosition1]}
+            onPress={() => {
+              nameInputRef.current.focus();
+            }}
+          >
             <Image
               style={[
                 styles.iconlylightOutlineprofile,
@@ -161,11 +215,11 @@ const RegisterPage1 = () => {
           </View>
           {/* <View style={[styles.placeholder2, styles.placeholderPosition1]}> */}
           <TouchableOpacity
-              style={[styles.placeholder2, styles.placeholderPosition1]}
-              onPress={() => {
-                lastnameInputRef.current.focus();
-              }}
-            >
+            style={[styles.placeholder2, styles.placeholderPosition1]}
+            onPress={() => {
+              lastnameInputRef.current.focus();
+            }}
+          >
             <Image
               style={[
                 styles.iconlylightOutlineprofile1,
@@ -196,11 +250,11 @@ const RegisterPage1 = () => {
           </View>
           {/* <View style={[styles.placeholder1, styles.placeholderPosition]}> */}
           <TouchableOpacity
-              style={[styles.placeholder1, styles.placeholderPosition]}
-              onPress={() => {
-                emailInputRef.current.focus();
-              }}
-            >
+            style={[styles.placeholder1, styles.placeholderPosition]}
+            onPress={() => {
+              emailInputRef.current.focus();
+            }}
+          >
             <Image
               style={[styles.iconlylightmessage, styles.IconLayoutemail]}
               contentFit="cover"
@@ -233,11 +287,11 @@ const RegisterPage1 = () => {
           /> */}
           {/* <View style={[styles.placeholder3, styles.placeholderPosition]}> */}
           <TouchableOpacity
-              style={[styles.placeholder3, styles.placeholderPosition]}
-              onPress={() => {
-                passwordInputRef.current.focus();
-              }}
-            >
+            style={[styles.placeholder3, styles.placeholderPosition]}
+            onPress={() => {
+              passwordInputRef.current.focus();
+            }}
+          >
             <Image
               style={[styles.iconlylightmessage, styles.IconLayoutpassword]}
               contentFit="cover"
@@ -268,7 +322,13 @@ const RegisterPage1 = () => {
           </TouchableOpacity>
         </View>
         <View style={styles.privacyPolicy}>
-          <View style={[styles.privacyPolicyChild, styles.childBorder]} />
+          {/* <View style={[styles.privacyPolicyChild, styles.childBorder]} /> */}
+          <CheckBox
+            checked={isChecked}
+            onPress={() => setChecked(!isChecked)}
+            checkedColor={Color.blackColor}
+            containerStyle={styles.privacyPolicyChild}
+          />
           <Text style={[styles.text7, styles.nameTypo]}>
             {`การดำเนินการต่อแสดงว่าคุณยอมรับ `}
             <Text style={styles.text8}>
@@ -554,24 +614,25 @@ const styles = StyleSheet.create({
   privacyPolicyChild: {
     borderRadius: 3,
     borderColor: Color.gray2,
-    borderWidth: 0.8,
-    width: 16,
-    height: 16,
-    left: 0,
-    top: 0,
-    backgroundColor: Color.whiteColor,
+    width: 25,
+    height: 25,
+    left: -4,
+    top: -4,
+    // backgroundColor:"red",
     borderStyle: "solid",
+    padding: 0,
   },
   text8: {
     color: Color.gray2,
     textDecorationLine: "underline", // This applies underline
   },
   text7: {
-    left: 26,
+    left: 35,
     fontSize: 10,
     lineHeight: 15,
-    width: 244,
+    width: 270,
     top: 0,
+    // backgroundColor:"red"
   },
   privacyPolicy: {
     top: 247,

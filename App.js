@@ -18,6 +18,7 @@ import MainContainer from './navigation/MainContainer';
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
+import HomeScreen from "./navigation/screens/HomeScreen";
 
 
 const App = () => {
@@ -42,7 +43,7 @@ const App = () => {
           <Stack.Navigator screenOptions={{ headerShown: false }}>
             <Stack.Screen
               name="WelcomeScreen"
-              component={RegisterPage1}
+              component={LoginPage}
               // component={Home}
               options={{ headerShown: false }}
             />

@@ -21,7 +21,7 @@ export default function SettingsScreen() {
   return (
     <View style={styles.container}>
       <Text
-        onPress={() => navigation.navigate('Home')}
+        // onPress={() => navigation.navigate('Home')}
         style={styles.emailText}>
         {auth.currentUser?.email}
       </Text>

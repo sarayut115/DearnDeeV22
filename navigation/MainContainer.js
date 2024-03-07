@@ -3,6 +3,7 @@ import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screens/HomeScreen";
 import DetailsScreen from "./screens/DetailsScreen";
 import SettingsScreen from "./screens/SettingsScreen";
+import ScanQRScreen from "./screens/ScanQRScreen";
 import { Ionicons } from "@expo/vector-icons";
 
 const Tab = createBottomTabNavigator();
@@ -20,7 +21,10 @@ const MainContainer = () => {
             iconName = "list";
           } else if (route.name === "Settings") {
             iconName = "settings";
+          } else if (route.name === "Search") {
+            iconName = "search";
           }
+          
 
           // You can return any component here that you like
           return <Ionicons name={iconName} size={size} color={color} />;
@@ -30,6 +34,7 @@ const MainContainer = () => {
       <Tab.Screen name="Home" component={HomeScreen} />
       <Tab.Screen name="Details" component={DetailsScreen} />
       <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen name="Search" component={ScanQRScreen} />
     </Tab.Navigator>
   );
 };
