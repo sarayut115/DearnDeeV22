@@ -20,7 +20,7 @@ const RegisterPage1 = () => {
   // เพิ่ม state สำหรับเก็บข้อมูลผู้ใช้
   const db = firebase.firestore();
   const auth = firebase.auth();
-  const realtimeDB = firebase.database(); // Add this line
+  // const realtimeDB = firebase.database(); // Add this line
 
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -72,9 +72,9 @@ const RegisterPage1 = () => {
         // console.log('Registered with:', user.email);
 
         // Add email to Realtime Database
-        database.ref('emails').push({
-          email: email,
-        });
+        // database.ref('emails').push({
+        //   email: email,
+        // });
 
         // เพิ่มข้อมูลลง Firestore
         db.collection("users").doc(user.uid).set({

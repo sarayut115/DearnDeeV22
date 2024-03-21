@@ -15,10 +15,13 @@ import ForgotPassword from "./screens/ForgotPassword";
 import Home from "./screens/Home";
 import Profile from "./screens/Profile";
 import MainContainer from './navigation/MainContainer';
+import HomeScreen1 from "./screens/HomeScreen1";
+// import LiquidFillGauge from "./compo/LiquidFillGauge";
+
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
-import HomeScreen from "./navigation/screens/HomeScreen";
+
 
 
 const App = () => {
@@ -48,6 +51,12 @@ const App = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
+              name="HomeScreen1"
+              component={HomeScreen1}
+              // component={Home}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
               name="MainContainer"
               component={MainContainer}
               options={{ headerShown: false }}
@@ -73,8 +82,8 @@ const App = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="SuccessRegistration"
-              component={SuccessRegistration}
+              name="RegisterPage1"
+              component={RegisterPage1}
               options={{ headerShown: false }}
             />
             <Stack.Screen
@@ -83,8 +92,8 @@ const App = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="RegisterPage1"
-              component={RegisterPage1}
+              name="SuccessRegistration"
+              component={SuccessRegistration}
               options={{ headerShown: false }}
             />
             <Stack.Screen

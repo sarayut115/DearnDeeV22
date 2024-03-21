@@ -62,7 +62,7 @@ const Profile = () => {
           </Text>
         </View>
         <Image
-          style={[styles.latestPicIcon, styles.iconPosition]}
+          style={styles.latestPicIcon}
           contentFit="cover"
           source={require("../assets/latestpic.png")}
         />
@@ -127,7 +127,7 @@ const Profile = () => {
           <View style={[styles.activityHistory, styles.iconProfileLayout]}>
             <View style={[styles.text12, styles.textPosition]}>
               <Text style={[styles.text9, styles.textTypo]}>
-                ประวัติกิจกรรม
+                ประวัตการใช้งานของเครื่อง
               </Text>
             </View>
             <Image
@@ -230,11 +230,6 @@ const Profile = () => {
           </View>
         </View>
       </View>
-      <Image
-        style={[styles.navbarIcon, styles.iconPosition]}
-        contentFit="cover"
-        source={require("../assets/navbar1.png")}
-      />
     </View>
   );
 };
@@ -256,7 +251,7 @@ const styles = StyleSheet.create({
   textTypo1: {
     textAlign: "left",
     lineHeight: 24,
-    fontSize: FontSize.textLargeTextSemiBold_size,
+    fontSize: FontSize.textLargeTextRegular_size,
     color: Color.blackColor,
     position: "absolute",
   },
@@ -290,9 +285,9 @@ const styles = StyleSheet.create({
   },
   textTypo: {
     color: Color.gray1,
-    fontFamily: FontFamily.textSmallTextRegular,
+    fontFamily: FontFamily.textMediumTextRegular,
     lineHeight: 18,
-    fontSize: FontSize.textSmallTextSemiBold_size,
+    fontSize: FontSize.textSmallTextMedium_size,
     textAlign: "left",
     position: "absolute",
   },
@@ -304,15 +299,11 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.textSmallTextMedium,
     fontWeight: "500",
     lineHeight: 21,
-    fontSize: FontSize.textMediumTextSemiBold_size,
+    fontSize: FontSize.textMediumTextRegular_size,
     textAlign: "left",
     left: 0,
     top: 0,
     position: "absolute",
-  },
-  iconPosition: {
-    position: "absolute",
-    left: 0,
   },
   bg3Layout: {
     height: 30,
@@ -320,7 +311,7 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   toggleChildPosition: {
-    backgroundColor: Color.blueLinear,
+    backgroundColor: Color.waterIntakeLinear,
     borderRadius: Border.br_80xl,
     left: 0,
     top: 0,
@@ -396,7 +387,7 @@ const styles = StyleSheet.create({
     top: 4,
     left: 113,
     fontWeight: "700",
-    fontFamily: FontFamily.titleH4Bold,
+    fontFamily: FontFamily.titleH2Bold,
   },
   header: {
     top: 40,
@@ -418,7 +409,7 @@ const styles = StyleSheet.create({
   text1: {
     left: 3,
     top: 26,
-    fontFamily: FontFamily.textSmallTextRegular,
+    fontFamily: FontFamily.textMediumTextRegular,
   },
   heightText: {
     left: 24,
@@ -435,7 +426,7 @@ const styles = StyleSheet.create({
   text2: {
     left: 1,
     top: 26,
-    fontFamily: FontFamily.textSmallTextRegular,
+    fontFamily: FontFamily.textMediumTextRegular,
   },
   weightText: {
     left: 29,
@@ -455,7 +446,7 @@ const styles = StyleSheet.create({
   text4: {
     left: 5,
     top: 26,
-    fontFamily: FontFamily.textSmallTextRegular,
+    fontFamily: FontFamily.textMediumTextRegular,
   },
   ageText: {
     width: 29,
@@ -477,11 +468,11 @@ const styles = StyleSheet.create({
     fontFamily: FontFamily.textSmallTextMedium,
     fontWeight: "500",
     lineHeight: 21,
-    fontSize: FontSize.textMediumTextSemiBold_size,
+    fontSize: FontSize.textMediumTextRegular_size,
   },
   loseAFat: {
     top: 26,
-    fontFamily: FontFamily.textSmallTextRegular,
+    fontFamily: FontFamily.textMediumTextRegular,
     left: 0,
   },
   name: {
@@ -494,6 +485,7 @@ const styles = StyleSheet.create({
     height: 55,
     left: 0,
     top: 0,
+    position: "absolute",
   },
   rectangleLineargradient: {
     height: 30,
@@ -507,7 +499,7 @@ const styles = StyleSheet.create({
   text6: {
     color: Color.whiteColor,
     lineHeight: 18,
-    fontSize: FontSize.textSmallTextSemiBold_size,
+    fontSize: FontSize.textSmallTextMedium_size,
     fontFamily: FontFamily.textSmallTextMedium,
     fontWeight: "500",
     textAlign: "left",
@@ -542,7 +534,7 @@ const styles = StyleSheet.create({
   },
   text7: {
     fontWeight: "600",
-    fontFamily: FontFamily.textCaptionSemiBold,
+    fontFamily: FontFamily.textLargeTextSemiBold,
     left: 0,
     top: 0,
   },
@@ -584,7 +576,7 @@ const styles = StyleSheet.create({
     left: 20,
   },
   text12: {
-    width: 71,
+    width: 128,
     left: 30,
   },
   activityHistory: {
@@ -617,7 +609,7 @@ const styles = StyleSheet.create({
     left: 30,
   },
   toggleChild: {
-    backgroundColor: Color.blueLinear,
+    backgroundColor: Color.waterIntakeLinear,
     borderRadius: Border.br_80xl,
     left: 0,
     top: 0,
@@ -682,12 +674,6 @@ const styles = StyleSheet.create({
   dataCardSection: {
     top: 241,
     height: 477,
-  },
-  navbarIcon: {
-    top: 722,
-    width: 375,
-    height: 90,
-    left: 0,
   },
   profile: {
     borderRadius: Border.br_21xl,

@@ -111,7 +111,7 @@ const SuccessRegistration = () => {
 
 const styles = StyleSheet.create({
   buttonLargeRegister: {
-    top: 554,
+    top: 730,
     left: 30,
     shadowColor: "rgba(149, 173, 254, 0.3)",
     shadowOffset: {
@@ -173,7 +173,7 @@ const styles = StyleSheet.create({
     width: 214,
   },
   onboardDescription: {
-    top: 70,
+    top: 246,
     left: 36,
     height: 18,
     width: 214,
