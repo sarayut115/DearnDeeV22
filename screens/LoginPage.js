@@ -26,7 +26,7 @@ const LoginPage = () => {
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(user => {
       if (user) {
-        navigation.replace("SuccessRegistration")
+        navigation.replace("MainContainer")
       }
     })
 

@@ -2,16 +2,19 @@ import * as React from "react";
 import { createBottomTabNavigator } from "@react-navigation/bottom-tabs";
 import HomeScreen from "./screens/HomeScreen";
 import AccountScreen from "./screens/AccountScreen";
-import SettingsScreen from "./screens/SettingsScreen";
+import DocumentScreen from "./screens/DocumentScreen";
 import { Ionicons } from "@expo/vector-icons";
 import { Text, TouchableOpacity, View, StatusBar, SafeAreaView } from "react-native";
-import HomeScreen1 from "../screens/HomeScreen1";
+import ControlScreen from "../LoggedIn/ControlScreen";
+import { Image } from "expo-image";
+import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 
 const Tab = createBottomTabNavigator();
 
-const MainContainer = ({ navigation }) => {
-  const navigation123 = useNavigation();
+const MainContainer = ({ }) => {
+  const navigation = useNavigation();
+
   return (
     <>
       {/* <SafeAreaView style={{ backgroundColor: "#fff" }}>
@@ -26,13 +29,15 @@ const MainContainer = ({ navigation }) => {
               iconName = "home";
             } else if (route.name === "Account") {
               iconName = "person";
-            } else if (route.name === "Settings") {
-              iconName = "settings";
+            } else if (route.name === "Documents") {
+              iconName = "document-text";
+              
             }
 
             return <Ionicons name={iconName} size={size} color={color} />;
           },
-          tabBarActiveTintColor: "#00b4d8",
+          // tabBarActiveTintColor: "#FF7AC6",
+          tabBarActiveTintColor: "#6896FE",
           tabBarInactiveTintColor: "#888",
           // tabBarStyle: {
           //   display: "flex",
@@ -40,14 +45,16 @@ const MainContainer = ({ navigation }) => {
         })}
       >
         <Tab.Screen
-          name="Home"
+          name="หน้าหลัก"
           component={HomeScreen}
           options={{
-            
+            tabBarIcon: ({ color, size }) => {
+              return <Ionicons name="home" size={size} color={color} />;
+            },
             headerLeft: () => (
-              <View style={{ marginLeft: 25, marginBottom:20 }}>
-                <Text style={{ fontSize: 16, fontWeight: "normal", color: "#111",margin:2 }}>
-                  ยินดีต้อนรับ 
+              <View style={{ marginLeft: 25, marginBottom: 20 }}>
+                <Text style={{ fontSize: 16, fontWeight: "normal", color: "#111", margin: 2 }}>
+                  ยินดีต้อนรับ
                 </Text>
                 <Text style={{ fontSize: 16, fontWeight: "bold", color: "#111" }}>
                   Maximus Walker
@@ -56,17 +63,97 @@ const MainContainer = ({ navigation }) => {
             ),
             headerRight: () => (
               <TouchableOpacity
-                onPress={() => navigation123.navigate("123")}
+                // onPress={() => navigation123.navigate("HomeScreen")}
+                // onPress={handleAddDevice}
+                // onPress={() => navigation.navigate("HomeScreen", { isModalVisible: true })}
                 style={{ marginRight: 15 }}
               >
-                <Ionicons name="add-circle-outline" size={35} color="#00b4d8" />
+                {/* <Ionicons name="add-circle-outline" size={35} color="#00b4d8" /> */}
+                <Image source={require("../assets/notification.png")} style={{ width: 150, height: 150, marginRight: -50, marginTop: 20 }} />
               </TouchableOpacity>
             ),
             headerTitle: "", // ลบ headerTitle ออก
+            headerStyle: {
+              elevation: 0, // ลบ shadow ของ header
+              borderBottomWidth: 1, // เพิ่มเส้นขอบด้านล่างของ header
+              borderBottomColor: '#ccc', // สีของเส้นขอบด้านล่างของ header
+              height: 100,
+            },
+
           }}
         />
-        <Tab.Screen name="Account" component={AccountScreen} />
-        <Tab.Screen name="Settings" component={SettingsScreen} />
+
+        <Tab.Screen 
+        name="ประวัติ" 
+        component={DocumentScreen} 
+          options={{
+            tabBarIcon: ({ color, size }) => {
+              return <Ionicons name="document-text" size={size} color={color} />;
+            },
+            headerShown: true,
+            headerTitle: "ประวัติการใช้งาน",
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: "bold",
+            },
+          }}
+        />
+
+        <Tab.Screen
+          name="โปรไฟล์"
+          component={AccountScreen}
+          options={{
+            tabBarIcon: ({ color, size }) => {
+              return <Ionicons name="person" size={size} color={color} />;
+            },
+            headerShown: true,
+            headerTitle: "บัญชีของฉัน",
+            headerTitleStyle: {
+              fontSize: 18,
+              fontWeight: "bold",
+            },
+
+            // headerRight: () => (
+            //   <TouchableOpacity
+            //     onPress={() => console.log("Pressed Edit")}
+            //     style={{ marginRight: 15 }}
+            //   >
+            //     <LinearGradient
+            //       style={{ padding: 10, alignItems: "center", borderRadius: 20, width:80, height:40 }}
+            //       colors={["#92a3fd", "#9dceff"]}
+            //       start={[0, 0]}
+            //       end={[1, 1]}
+            //     >
+            //       <Text style={{ fontSize: 16, color: "#ffff" }}>แก้ไข</Text>
+            //     </LinearGradient>
+            //   </TouchableOpacity>
+
+            // ),
+            // headerLeft: () => (
+            //   <View style={{ marginLeft: 15 }}>
+            //     {/* ภาพโปรไฟล์ */}
+            //     <Image
+            //       source={require("../assets/latestpic.png")} // เปลี่ยนเส้นทางไปยังไฟล์ภาพโปรไฟล์ของคุณ
+            //       style={{ width: 30, height: 30, borderRadius: 15 }}
+            //     />
+            //     {/* ชื่อและรายละเอียด */}
+            //     <View style={{ marginLeft: 10, width: 90, }}>
+            //       <Text style={{ fontSize: 16, fontWeight: "bold", }} >
+            //         รัชชานนท์
+            //       </Text>
+            //       <Text style={{ fontSize: 16, fontWeight: "bold" }}>
+            //         หอมประเสริฐ
+            //       </Text>
+            //       <Text style={{ fontSize: 14, color: "#888" }}>
+            //         รายละเอียดเพิ่มเติม...
+            //       </Text>
+            //     </View>
+            //   </View>
+            // ),
+          }}
+        />
+
+
       </Tab.Navigator>
     </>
   );
