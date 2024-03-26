@@ -2,58 +2,230 @@
 import * as React from "react";
 import { useState, useEffect } from 'react';
 import { StyleSheet, View, Text, TouchableOpacity, FlatList, ScrollView } from "react-native";
+import Slider from '@react-native-community/slider';
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { firebase } from '../config';
+import { useNavigation } from "@react-navigation/native";
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const HomeSceen = () => {
 
+
+// import MQTT from 'react-native-mqtt';
+
+
+
+const ControlScreen = () => {
+    // // MQTT client configuration
+    // const client = new MQTT.Client('34.73.215.67', 1883, 'clientId');
+
+    // // Connect to the MQTT broker
+    // client.connect({ onSuccess: onConnect });
+
+    // // MQTT connection success callback
+    // function onConnect() {
+    //     console.log('Connected to MQTT broker');
+    // }
+
+    // // Function to send MQTT message
+    // const sendMQTTMessage = (topic, message) => {
+    //     if (client.isConnected()) {
+    //         client.publish(topic, message);
+    //         console.log('Message sent:', message);
+    //     } else {
+    //         console.log('MQTT client is not connected');
+    //     }
+    // };
+
+    const navigation = useNavigation();
     const realtimeDB = firebase.database();
-    const [value, setValue] = useState(0);
 
     const [isOn, setIsOn] = useState(false);
 
     const [isVectorActive, setIsVectorActive] = useState(false);
     const [isRimentalHealthFillActive, setIsRimentalHealthFillActive] = useState(false);
-    const [isMaterialSymbolshdrAutoActive, setIsMaterialSymbolshdrAutoActive] = useState(true);
+    const [isMaterialSymbolshdrAutoActive, setIsMaterialSymbolshdrAutoActive] = useState(false);
 
+    const [value, setValue] = useState(0);
 
-    const handleVectorPress = () => {
-        setIsVectorActive(true);
-        setIsRimentalHealthFillActive(false);
-        setIsMaterialSymbolshdrAutoActive(false);
-    };
+    const [isDeviceOn, setIsDeviceOn] = useState(true); // เพิ่มตัวแปรเพื่อตรวจสอบว่าอุปกรณ์เปิดหรือปิด
 
-    const handleRimentalHealthFillPress = () => {
-        setIsVectorActive(false);
-        setIsRimentalHealthFillActive(true);
-        setIsMaterialSymbolshdrAutoActive(false);
-    };
-
-    const handleMaterialSymbolshdrAutoPress = () => {
-        setIsVectorActive(false);
-        setIsRimentalHealthFillActive(false);
-        setIsMaterialSymbolshdrAutoActive(true);
-    };
+    const [sliderValue, setSliderValue] = useState(50); // ค่าเริ่มต้นของสไลด์
 
     useEffect(() => {
-        // Subscribe to changes in the Firebase database
-        const dbRef = realtimeDB.ref('test/intensity');
-        const onDataChange = (snapshot) => {
-            const intensityValue = snapshot.val();
-            if (intensityValue !== null) {
-                setValue(intensityValue);
+        // เมื่อค่า isOn เปลี่ยนแปลง ตรวจสอบว่าอุปกรณ์เปิดหรือปิด
+        setIsDeviceOn(isOn);
+        setValue(0);
+        console.log('=====')
+        console.log(isDeviceOn, 'asdasd')
+        console.log(isOn)
+    }, [isOn]);
+
+
+    // const handleVectorPress = () => {
+    //     setIsVectorActive(true);
+    //     setIsRimentalHealthFillActive(false);
+    //     setIsMaterialSymbolshdrAutoActive(false);
+    // };
+
+    // const handleRimentalHealthFillPress = () => {
+    //     setIsVectorActive(false);
+    //     setIsRimentalHealthFillActive(true);
+    //     setIsMaterialSymbolshdrAutoActive(false);
+    // };
+
+    // const handleMaterialSymbolshdrAutoPress = () => {
+    //     setIsVectorActive(false);
+    //     setIsRimentalHealthFillActive(false);
+    //     setIsMaterialSymbolshdrAutoActive(true);
+    // };
+
+
+    // โหลดค่าเริ่มต้นของ isOn จาก AsyncStorage
+    useEffect(() => {
+        const loadIsOn = async () => {
+            try {
+                const storedIsOn = await AsyncStorage.getItem('isOn');
+                if (storedIsOn !== null) {
+                    setIsOn(storedIsOn === 'true'); // แปลงค่าเป็น boolean
+                }
+            } catch (error) {
+                console.error('Error loading isOn from AsyncStorage:', error);
             }
         };
 
-        dbRef.on('value', onDataChange);
+        loadIsOn();
+    }, []);
 
-        // Unsubscribe when the component unmounts
-        return () => {
-            dbRef.off('value', onDataChange);
+
+    // บันทึกค่า isOn ลงใน AsyncStorage เมื่อมีการเปลี่ยนแปลง
+    useEffect(() => {
+        const saveIsOn = async () => {
+            try {
+                await AsyncStorage.setItem('isOn', isOn.toString()); // แปลงค่าเป็น string ก่อนบันทึกลง AsyncStorage
+            } catch (error) {
+                console.error('Error saving isOn to AsyncStorage:', error);
+            }
         };
-    }, [realtimeDB]);
+
+        saveIsOn();
+    }, [isOn]);
+
+
+    const handleVectorPress = async () => {
+        setIsVectorActive(true);
+        setIsRimentalHealthFillActive(false);
+        setIsMaterialSymbolshdrAutoActive(false);
+        try {
+            await AsyncStorage.setItem('isVectorActive', 'true');
+            await AsyncStorage.setItem('isRimentalHealthFillActive', 'false');
+            await AsyncStorage.setItem('isMaterialSymbolshdrAutoActive', 'false');
+        } catch (error) {
+            console.error('Error saving button state to AsyncStorage:', error);
+        }
+    };
+
+    const handleRimentalHealthFillPress = async () => {
+        setIsVectorActive(false);
+        setIsRimentalHealthFillActive(true);
+        setIsMaterialSymbolshdrAutoActive(false);
+        try {
+            await AsyncStorage.setItem('isVectorActive', 'false');
+            await AsyncStorage.setItem('isRimentalHealthFillActive', 'true');
+            await AsyncStorage.setItem('isMaterialSymbolshdrAutoActive', 'false');
+        } catch (error) {
+            console.error('Error saving button state to AsyncStorage:', error);
+        }
+    };
+
+    const handleMaterialSymbolshdrAutoPress = async () => {
+        setIsVectorActive(false);
+        setIsRimentalHealthFillActive(false);
+        setIsMaterialSymbolshdrAutoActive(true);
+        try {
+            await AsyncStorage.setItem('isVectorActive', 'false');
+            await AsyncStorage.setItem('isRimentalHealthFillActive', 'false');
+            await AsyncStorage.setItem('isMaterialSymbolshdrAutoActive', 'true');
+        } catch (error) {
+            console.error('Error saving button state to AsyncStorage:', error);
+        }
+    };
+
+    // Load button state from AsyncStorage when component mounts
+    useEffect(() => {
+        const loadButtonState = async () => {
+            try {
+                const vectorActive = await AsyncStorage.getItem('isVectorActive');
+                const rimentalHealthFillActive = await AsyncStorage.getItem('isRimentalHealthFillActive');
+                const materialSymbolshdrAutoActive = await AsyncStorage.getItem('isMaterialSymbolshdrAutoActive');
+                setIsVectorActive(vectorActive === 'true');
+                setIsRimentalHealthFillActive(rimentalHealthFillActive === 'true');
+                setIsMaterialSymbolshdrAutoActive(materialSymbolshdrAutoActive === 'true');
+            } catch (error) {
+                console.error('Error loading button state from AsyncStorage:', error);
+            }
+        };
+
+        loadButtonState();
+    }, []);
+
+
+
+    // บันทึกค่า sliderValue ลงใน AsyncStorage เมื่อมีการเปลี่ยนแปลง
+    useEffect(() => {
+        const loadSliderValue = async () => {
+            try {
+                const storedSliderValue = await AsyncStorage.getItem('sliderValue');
+                if (storedSliderValue !== null) {
+                    setSliderValue(parseInt(storedSliderValue)); // Parse string to integer
+                }
+            } catch (error) {
+                console.error('Error loading sliderValue from AsyncStorage:', error);
+            }
+        };
+
+        loadSliderValue();
+    }, []);
+
+
+    // โหลดค่า sliderValue จาก AsyncStorage เมื่อคอมโพเนนต์ถูกโหลดขึ้นมา
+    useEffect(() => {
+        const saveSliderValue = async () => {
+            try {
+                await AsyncStorage.setItem('sliderValue', sliderValue.toString()); // Convert integer to string
+            } catch (error) {
+                console.error('Error saving sliderValue to AsyncStorage:', error);
+            }
+        };
+
+        saveSliderValue();
+    }, [sliderValue]);
+
+
+
+    useEffect(() => {
+        // เมื่อค่า isOn เปลี่ยนและมีค่าเป็น true
+        if (isOn) {
+            // Subscribe to changes in the Firebase database
+            const dbRef = realtimeDB.ref('test/intensity');
+            const onDataChange = (snapshot) => {
+                const intensityValue = snapshot.val();
+                if (intensityValue !== null) {
+                    setValue(intensityValue);
+                }
+            };
+
+            dbRef.on('value', onDataChange);
+            //set ปุ่มออโต้เมื่อเปิดเครื่อง
+            // setIsMaterialSymbolshdrAutoActive(true)
+            // Unsubscribe when the component unmounts
+            return () => {
+                dbRef.off('value', onDataChange);
+            };
+        }
+    }, [isOn, realtimeDB]);  // เพิ่ม isOn เข้าไปใน dependency array ของ useEffect เพื่อให้ useEffect ทำงานเมื่อมีการเปลี่ยนแปลงค่า isOn
+
 
     const handlePress = (newValue) => {
         // Update the local state
@@ -62,18 +234,25 @@ const HomeSceen = () => {
         // Update the Firebase database
         realtimeDB.ref('test/intensity').set(newValue);
         // console.log("ส่งละ")
+        // Send MQTT message
+        // sendMQTTMessage('s7connection', newValue.toString());
     };
 
-    const handlePressIsOnOff = () => {
-        setIsOn(!isOn);
+
+    const handlePressIsOnOff = async () => {
+        const newIsOn = !isOn;
+        setIsOn(newIsOn);
     };
+
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
+            disabled={!isDeviceOn} // ปิดใช้งานปุ่มเมื่ออุปกรณ์ปิด
             style={[
                 styles.button,
                 styles.flatListItem,
-                { backgroundColor: item === value ? '#3498db' : '#2c3e50' },
+                // { backgroundColor: item === value ? '#3498db' : '#2c3e50' },
+                { backgroundColor: item === value ? '#3498db' : '#A0A0A0' },
             ]}
             onPress={() => handlePress(item)}>
             <Text style={{ color: 'white', fontSize: 18 }}>{item}</Text>
@@ -81,45 +260,44 @@ const HomeSceen = () => {
     );
 
 
-
-
     return (
-
-        <View style={styles.homesceen1}>
-            <View style={styles.header1}>
-                <View style={styles.backNavs}>
-                    <View style={styles.backNavsChild} />
+        <ScrollView>
+            <View style={styles.homesceen1}>
+                <View style={styles.header1}>
+                    <TouchableOpacity style={styles.backNavs} onPress={() => navigation.navigate("MainContainer")}>
+                        <View style={styles.backNavsChild} />
+                        <Image
+                            style={styles.backNavsItem}
+                            contentFit="cover"
+                            source={require("../assets/group-9845.png")}
+                        />
+                    </TouchableOpacity>
                     <Image
-                        style={styles.backNavsItem}
+                        style={[styles.detailNavsIcon, styles.iconLayout]}
                         contentFit="cover"
-                        source={require("../assets/group-9845.png")}
+                        source={require("../assets/detailnavs.png")}
                     />
+                    <View style={styles.title}>
+                        <Text style={[styles.text, styles.textFlexBox]}>
+                            เครื่องกระตุ้นกระแสไฟฟ้า
+                        </Text>
+                    </View>
                 </View>
-                <Image
-                    style={[styles.detailNavsIcon, styles.iconLayout]}
-                    contentFit="cover"
-                    source={require("../assets/detailnavs.png")}
-                />
-                <View style={styles.title}>
-                    <Text style={[styles.text, styles.textFlexBox]}>
-                        เครื่องกระตุ้นกระแสไฟฟ้า
-                    </Text>
-                </View>
-            </View>
-            <TouchableOpacity
-                style={[styles.iconlyboldplayParent, styles.parentLayout]}
-                onPress={handlePressIsOnOff}
-            >
-                <Image
-                    style={styles.iconlyboldplay}
-                    contentFit="cover"
-                    source={isOn ? require("../assets/iconlyboldplay1.png") : require("../assets/iconlyboldplay.png")}
-                />
-                <Text style={[styles.text1, styles.text1Typo]}>{isOn ? "เปิดใช้งาน" : "ปิดใช้งาน"}</Text>
-            </TouchableOpacity>
-            <View style={[styles.materialSymbolshdrAutoParent, styles.parentLayout]}>
 
-                {/* <TouchableOpacity>
+                <TouchableOpacity
+                    style={[styles.iconlyboldplayParent, styles.parentLayout]}
+                    onPress={handlePressIsOnOff}
+                >
+                    <Image
+                        style={styles.iconlyboldplay}
+                        contentFit="cover"
+                        source={isOn ? require("../assets/iconlyboldnoplay1.png") : require("../assets/iconlyboldplay1.png")}
+                    />
+                    <Text style={[styles.text1, styles.text1Typo]}>{isOn ? "ปิดใช้งาน" : "เปิดใช้งาน"}</Text>
+                </TouchableOpacity>
+                <View style={[styles.materialSymbolshdrAutoParent, styles.parentLayout]}>
+
+                    {/* <TouchableOpacity>
                     <Image
                         style={styles.vectorIcon}
                         contentFit="cover"
@@ -145,102 +323,127 @@ const HomeSceen = () => {
                 <Text style={[styles.text3, styles.textTypo]}>ทั่วไป</Text>
                 <Text style={styles.text4}>ปรับขั้นสูง</Text> */}
 
-                <TouchableOpacity onPress={handleVectorPress}>
-                    <Image
-                        style={styles.vectorIcon}
-                        contentFit="cover"
-                        source={isVectorActive ? require("../assets/vector1.png") : require("../assets/vector.png")}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={handleRimentalHealthFillPress}>
-                    <Image
-                        style={styles.rimentalHealthFillIcon}
-                        contentFit="cover"
-                        source={isRimentalHealthFillActive ? require("../assets/rimentalhealthfill1.png") : require("../assets/rimentalhealthfill.png")}
-                    />
-                </TouchableOpacity>
-
-                <TouchableOpacity onPress={handleMaterialSymbolshdrAutoPress}>
-                    <Image
-                        style={styles.materialSymbolshdrAutoIcon}
-                        contentFit="cover"
-                        source={isMaterialSymbolshdrAutoActive ? require("../assets/materialsymbolshdrauto1.png") : require("../assets/materialsymbolshdrauto.png")}
-                    />
-                </TouchableOpacity>
+                    <TouchableOpacity
+                        disabled={!isDeviceOn}
+                        onPress={handleVectorPress} >
+                        <Image
+                            style={styles.vectorIcon}
+                            contentFit="cover"
+                            source={isVectorActive ? require("../assets/vector1.png") : require("../assets/vector.png")}
 
 
-                {/* <Text style={[styles.text2, styles.textTypo, isMaterialSymbolshdrAutoActive && { color: '#A0A0A0' }]}>อัตโนมัติ</Text>
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        disabled={!isDeviceOn}
+                        onPress={handleRimentalHealthFillPress}>
+                        <Image
+                            style={styles.rimentalHealthFillIcon}
+                            contentFit="cover"
+                            source={isRimentalHealthFillActive ? require("../assets/rimentalhealthfill1.png") : require("../assets/rimentalhealthfill.png")}
+                        />
+                    </TouchableOpacity>
+
+                    <TouchableOpacity
+                        disabled={!isDeviceOn}
+                        onPress={handleMaterialSymbolshdrAutoPress}>
+                        <Image
+                            style={styles.materialSymbolshdrAutoIcon}
+                            contentFit="cover"
+                            source={isMaterialSymbolshdrAutoActive ? require("../assets/materialsymbolshdrauto1.png") : require("../assets/materialsymbolshdrauto.png")}
+                        />
+                    </TouchableOpacity>
+
+
+                    {/* <Text style={[styles.text2, styles.textTypo, isMaterialSymbolshdrAutoActive && { color: '#A0A0A0' }]}>อัตโนมัติ</Text>
                 <Text style={[styles.text3, styles.textTypo, isVectorActive && { color: '#A0A0A0' }]}>ทั่วไป</Text>
                 <Text style={[styles.text4, isRimentalHealthFillActive && { color: '#A0A0A0' }]}>ปรับขั้นสูง</Text> */}
-                <Text style={[styles.text2, styles.textTypo, { color: isMaterialSymbolshdrAutoActive ? 'black' : '#A0A0A0' }]}>อัตโนมัติ</Text>
-                <Text style={[styles.text3, styles.textTypo, { color: isVectorActive ? 'black' : '#A0A0A0' }]}>ส่วนตัว</Text>
-                <Text style={[styles.text4, { color: isRimentalHealthFillActive ? 'black' : '#A0A0A0' }]}>ปรับขั้นสูง</Text>
+                    <Text style={[styles.text2, styles.textTypo, { color: isMaterialSymbolshdrAutoActive ? 'black' : '#A0A0A0' }]}>อัตโนมัติ</Text>
+                    <Text style={[styles.text3, styles.textTypo, { color: isVectorActive ? 'black' : '#A0A0A0' }]}>ผ่อนคลาย</Text>
+                    <Text style={[styles.text4, { color: isRimentalHealthFillActive ? 'black' : '#A0A0A0' }]}>ปรับขั้นสูง</Text>
 
 
-            </View>
-
-            <View style={[styles.homesceen1Child, styles.parentLayout, { justifyContent: 'center', alignItems: 'center' }]}>
-                <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความแรง</Text>
-                <FlatList
-                    data={[1, 2, 3, 4, 5]}
-                    renderItem={renderItem}
-                    keyExtractor={(item) => item.toString()}
-                    horizontal
-                    contentContainerStyle={[{ marginTop: 20 }, styles.flatListContainer]}
-                />
-            </View>
-
-            <View style={[styles.homesceen1Item, styles.homesceen1Layout]} />
-            <View style={[styles.homesceen1Inner, styles.homesceen1Layout]} />
-            <View style={[styles.homesceen2Inner, styles.homesceen1Layout]} />
-
-            <LinearGradient
-                style={[styles.bannerPie1ParentAA, styles.scheduleBgChildBgAA]}
-                locations={[0, 1]}
-                colors={["#92a3fd", "#9dceff"]}
-            >
-                <View style={styles.bannerPie1AA}>
-                    <View style={styles.bannerPieTextAA}>
-                        <Text style={[styles.textAA, styles.textPositionAA]}>80 %</Text>
-                    </View>
                 </View>
-                <View style={styles.action}>
-                    <View style={[styles.scheduleBgAA, styles.scheduleChildPositionAA]}>
-                        <LinearGradient
-                            style={[styles.scheduleBgChildAA, styles.scheduleChildPositionAA]}
-                            locations={[0, 1]}
-                            colors={["#92a3fd", "#9dceff"]}
-                        />
+
+                <View style={[styles.homesceen1Child, styles.parentLayout, { justifyContent: 'center', alignItems: 'center' }]}>
+                    <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความแรง</Text>
+                    <FlatList
+                        data={[1, 2, 3, 4, 5]}
+                        renderItem={renderItem}
+                        keyExtractor={(item) => item.toString()}
+                        horizontal
+                        contentContainerStyle={[{ marginTop: 20 }, styles.flatListContainer]}
+                    />
+                </View>
+
+                <View style={[styles.homesceen1Item, styles.homesceen1Layout]} >
+                    <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความถี่ </Text>
+                    <Text style={styles.sliderValue}>{sliderValue}</Text>
+                    <Slider
+                        style={styles.slider}
+                        disabled={!isDeviceOn}
+                        minimumValue={20}
+                        maximumValue={70}
+                        step={10} // เพิ่มค่าทีละ 10
+                        value={sliderValue}
+                        onValueChange={(value) => setSliderValue(value)}
+                        thumbTintColor="#3498db" // สีของจุดที่ใช้เลื่อน Slider
+                        minimumTrackTintColor="#3498db" // สีของเส้นเส้นสำหรับช่วงที่เลื่อนไปแล้ว
+                        maximumTrackTintColor="#A0A0A0" // สีของเส้นเส้นสำหรับช่วงที่ยังไม่ได้เลื่อนไป
+                    />
+                    {/* <Text style={styles.sliderValue}>{sliderValue}</Text> */}
+                </View>
+                <View style={[styles.homesceen1Inner, styles.homesceen1Layout]} />
+                <View style={[styles.homesceen2Inner, styles.homesceen1Layout]} />
+
+                <LinearGradient
+                    style={[styles.bannerPie1ParentAA, styles.scheduleBgChildBgAA]}
+                    locations={[0, 1]}
+                    colors={["#92a3fd", "#9dceff"]}
+                >
+                    <View style={styles.bannerPie1AA}>
+                        <View style={styles.bannerPieTextAA}>
+                            <Text style={[styles.textAA, styles.textPositionAA]}>80 %</Text>
+                        </View>
                     </View>
-                    <View style={styles.workoutScheduleTextAA}>
-                        <Text style={[styles.todayTargetAA, styles.textPositionAA]}>
-                            เครื่องสามารถใช้ได้อีกประมาณ
-                        </Text>
-                    </View>
-                    <View style={styles.buttonCheckAA}>
+                    <View style={styles.action}>
                         <View style={[styles.scheduleBgAA, styles.scheduleChildPositionAA]}>
                             <LinearGradient
-                                style={[styles.buttonBgChildAA, styles.buttonLayoutAA]}
+                                style={[styles.scheduleBgChildAA, styles.scheduleChildPositionAA]}
                                 locations={[0, 1]}
                                 colors={["#92a3fd", "#9dceff"]}
                             />
                         </View>
-                        <View style={styles.buttonTextAA}>
-                            <Text style={[styles.checkAA, styles.checkClrAA]}>1 ชม.</Text>
+                        <View style={styles.workoutScheduleTextAA}>
+                            <Text style={[styles.todayTargetAA, styles.textPositionAA]}>
+                                เครื่องสามารถใช้ได้อีกประมาณ
+                            </Text>
+                        </View>
+                        <View style={styles.buttonCheckAA}>
+                            <View style={[styles.scheduleBgAA, styles.scheduleChildPositionAA]}>
+                                <LinearGradient
+                                    style={[styles.buttonBgChildAA, styles.buttonLayoutAA]}
+                                    locations={[0, 1]}
+                                    colors={["#92a3fd", "#9dceff"]}
+                                />
+                            </View>
+                            <View style={styles.buttonTextAA}>
+                                <Text style={[styles.checkAA, styles.checkClrAA]}>1 ชม.</Text>
+                            </View>
                         </View>
                     </View>
-                </View>
-                <LinearGradient
-                    style={[styles.button1AA, styles.buttonLayoutAA]}
-                    locations={[0, 1]}
-                    colors={["#c58bf2", "#eea4ce"]}
-                >
-                    <Text style={[styles.buttonAA, styles.checkClrAA]}>แบตเตอรี่</Text>
+                    <LinearGradient
+                        style={[styles.button1AA, styles.buttonLayoutAA]}
+                        locations={[0, 1]}
+                        colors={["#c58bf2", "#eea4ce"]}
+                    >
+                        <Text style={[styles.buttonAA, styles.checkClrAA]}>แบตเตอรี่</Text>
+                    </LinearGradient>
                 </LinearGradient>
-            </LinearGradient>
 
-        </View>
+            </View>
+        </ScrollView>
 
     );
 };
@@ -292,9 +495,9 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
     homesceen1Layout: {
-        height: 87,
-        width: 334,
-        borderRadius: Border.br_3xs,
+        height: 110,
+        width: 346,
+        borderRadius: 10,
         left: 20,
         backgroundColor: Color.borderColor,
         position: "absolute",
@@ -385,7 +588,7 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
     iconlyboldplay: {
-        height: "81.16%",
+        height: "84.16%",
         top: "10.14%",
         right: "55.69%",
         bottom: "8.7%",
@@ -460,7 +663,7 @@ const styles = StyleSheet.create({
         left: "43.13%",
     },
     text3: {
-        left: "12.5%",
+        left: "8.5%",
         width: "19.46%",
     },
     text4: {
@@ -481,16 +684,16 @@ const styles = StyleSheet.create({
     },
     homesceen1Child: {
         top: 526,
-        height: 100,
+        height: 110,
     },
     homesceen1Item: {
-        top: 643,
+        top: 653,
     },
     homesceen1Inner: {
-        top: 746,
+        top: 786,
     },
     homesceen2Inner: {
-        top: 846,
+        top: 916,
     },
     text5: {
         height: "2.09%",
@@ -668,7 +871,7 @@ const styles = StyleSheet.create({
         borderRadius: Border.br_21xl,
         flex: 1,
         // height: 812,
-        height: 1000,
+        height: 1200,
         overflow: "hidden",
         width: "100%",
         backgroundColor: Color.whiteColor,
@@ -865,7 +1068,19 @@ const styles = StyleSheet.create({
         width: "100%",
         backgroundColor: Color.whiteColor,
     },
+
+    slider: {
+        width: 300,
+        height: 40,
+        alignSelf: 'center',
+        marginTop: 1,
+    },
+    sliderValue: {
+        marginTop: 1,
+        fontSize: 20,
+        alignSelf: 'center',
+    },
 });
 
-export default HomeSceen;
+export default ControlScreen;
 

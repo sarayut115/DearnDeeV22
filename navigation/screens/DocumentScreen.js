@@ -5,7 +5,7 @@ import { useNavigation } from '@react-navigation/native';
 
 const auth = firebase.auth();
 
-export default function SettingsScreen() {
+export default function DocumentScreen() {
   const navigation = useNavigation();
 
   const handleSignOut = () => {

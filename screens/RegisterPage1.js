@@ -3,6 +3,7 @@ import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
 import { FontFamily, Color, FontSize, Border } from "../GlobalStyles";
+import { Ionicons } from '@expo/vector-icons';
 import React, { useState, useEffect, useRef } from "react";
 // import { auth, db } from '../firebase';
 import { firebase } from '../config';
@@ -105,16 +106,16 @@ const RegisterPage1 = () => {
   //     Alert.alert('กรุณายอมรับนโยบายความเป็นส่วนตัวและข้อกำหนดการใช้งานของเรา');
   //     return;
   //   }
-  
+
   //   auth.createUserWithEmailAndPassword(email, password)
   //     .then(userCredentials => {
   //       const user = userCredentials.user;
-  
+
   //       // Add email to Realtime Database
   //       realtimeDB.ref('emails').push({
   //         email: email,
   //       });
-  
+
   //       // Add user data to Firestore
   //       db.collection("users").doc(user.uid).set({
   //         firstName: firstName,
@@ -131,13 +132,13 @@ const RegisterPage1 = () => {
   //       .catch(error => {
   //         console.error('Error adding user data to Firestore:', error);
   //       });
-  
+
   //       console.log('Registered with:', user.email);
   //       navigation.replace("RegisterPage");
   //     })
   //     .catch(error => alert(error.message));
   // }
-  
+
 
 
   // const handleSignUp = () => {
@@ -331,11 +332,19 @@ const RegisterPage1 = () => {
           />
           <Text style={[styles.text7, styles.nameTypo]}>
             {`การดำเนินการต่อแสดงว่าคุณยอมรับ `}
-            <Text style={styles.text8}>
-              นโยบายความเป็นส่วนตัว
-            </Text>
+            <TouchableOpacity style={styles.privacy} onPress={() => navigation.navigate("PrivacyPolicyScreen")}>
+              <Text style={styles.text8}>
+                นโยบายความเป็นส่วนตัว
+              </Text>
+            </TouchableOpacity>
+
             {` และ `}
-            <Text style={styles.text8}>ข้อกำหนดการใช้งานของเรา</Text>
+
+            <TouchableOpacity style={styles.privacy} onPress={() => navigation.navigate("TermsOfUseScreen")}>
+              <Text style={styles.text8}>
+                ข้อกำหนดการใช้งานของเรา
+              </Text>
+            </TouchableOpacity>
           </Text>
         </View>
       </View>
@@ -392,7 +401,7 @@ const RegisterPage1 = () => {
           </Text>
         </TouchableOpacity>
       </View>
-      <TouchableOpacity
+      {/* <TouchableOpacity
         style={styles.arrowLeft}
       // onPress={() => navigation.navigate("LoginPage")}
       >
@@ -401,12 +410,24 @@ const RegisterPage1 = () => {
           contentFit="cover"
           source={require("../assets/arrowleft.png")}
         />
+      </TouchableOpacity> */}
+      <TouchableOpacity onPress={() => navigation.goBack()} style={styles.goBackButton}>
+        <Ionicons name="arrow-back" size={24} color="black" />
       </TouchableOpacity>
     </View>
   );
 };
 
 const styles = StyleSheet.create({
+  privacy: {
+    paddingTop: 12, // หรือค่าที่คุณต้องการ
+    // คุณอาจเพิ่ม styles อื่น ๆ ตามต้องการ
+  },
+  goBackButton: {
+    position: 'absolute',
+    top: 40,
+    left: 20,
+  },
   arrowLeft: {
     left: "9.87%",
     top: "5.42%",
@@ -625,6 +646,7 @@ const styles = StyleSheet.create({
   text8: {
     color: Color.gray2,
     textDecorationLine: "underline", // This applies underline
+    fontSize:10
   },
   text7: {
     left: 35,

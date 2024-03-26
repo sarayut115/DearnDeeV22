@@ -15,9 +15,13 @@ import ForgotPassword from "./screens/ForgotPassword";
 import Home from "./screens/Home";
 import Profile from "./screens/Profile";
 import MainContainer from './navigation/MainContainer';
-import HomeScreen1 from "./screens/HomeScreen1";
+import ControlScreen from "./LoggedIn/ControlScreen";
+import SetttingScreen from "./LoggedIn/SettingScreen";
+import PrivacyPolicyScreen from "./LoggedIn/PrivacyPolicyScreen";
+import TermsOfUseScreen from "./LoggedIn/TermsOfUseScreen";
+import ContactUsScreen from "./LoggedIn/ContactUsScreen";
 // import LiquidFillGauge from "./compo/LiquidFillGauge";
-
+import Mqtt from 'react-native-mqtt';
 
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { View, Text, Pressable, TouchableOpacity } from "react-native";
@@ -51,8 +55,32 @@ const App = () => {
               options={{ headerShown: false }}
             />
             <Stack.Screen
-              name="HomeScreen1"
-              component={HomeScreen1}
+              name="ContactUsScreen"
+              component={ContactUsScreen}
+              // component={Home}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="PrivacyPolicyScreen"
+              component={PrivacyPolicyScreen}
+              // component={Home}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="TermsOfUseScreen"
+              component={TermsOfUseScreen}
+              // component={Home}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="ControlScreen"
+              component={ControlScreen}
+              // component={Home}
+              options={{ headerShown: false }}
+            />
+            <Stack.Screen
+              name="SetttingScreen"
+              component={SetttingScreen}
               // component={Home}
               options={{ headerShown: false }}
             />
