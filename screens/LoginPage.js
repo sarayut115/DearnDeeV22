@@ -33,18 +33,6 @@ const LoginPage = () => {
     return unsubscribe
   }, [])
 
-  // const handleLogin = async () => {
-  //   try {
-  //     const response = await firebase.auth().signInWithEmailAndPassword(email, password);
-  //     // ล็อกอินสำเร็จ
-  //     console.log(response);
-  //     navigation.navigate("SuccessRegistration");
-  //   } catch (error) {
-  //     // การล็อกอินล้มเหลว
-  //     Alert.alert("Error", "การล็อกอินล้มเหลว: " + error.message);
-  //   }
-  // };
-
   const handleLogin = () => {
     auth
       .signInWithEmailAndPassword(email, password)
@@ -54,18 +42,6 @@ const LoginPage = () => {
       })
       .catch(error => alert(error.message))
   }
-
-  // const handleLogin = async () => {
-
-  //   await signInWithEmailAndPassword(auth, email.trim(), password)
-  //     .then((userCredential) => {
-  //       const user = userCredential.user;
-  //       alert("Login successful :)");
-  //     })
-  //     .catch((err) => {
-  //       alert(err.message);
-  //     });
-  // };
 
   return (
     <View style={styles.loginPage}>
@@ -79,7 +55,7 @@ const LoginPage = () => {
         <View style={[styles.label, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
             <TouchableOpacity
-              style={[styles.labelBgChild, styles.childLayout]}
+              style={[styles.labelBgChild]}
               onPress={() => {
                 emailInputRef.current.focus(); // focus ที่ TextInput ของอีเมล
               }}
@@ -178,7 +154,7 @@ const LoginPage = () => {
       <View style={styles.or}>
         <Text style={[styles.text2, styles.text2Layout]}>หรือ</Text>
       </View>
-      <View style={[styles.loginSocialMedia, styles.groupChildLayout]}>
+      <TouchableOpacity style={[styles.loginSocialMedia, styles.groupChildLayout]} onPress={() => navigation.navigate("LoginPage")}>
         <View style={[styles.rectangleParent, styles.groupChildLayout]}>
           <View style={[styles.groupChild, styles.childLayout]} />
           <Image
@@ -190,7 +166,7 @@ const LoginPage = () => {
             ดำเนินการต่อด้วย google
           </Text>
         </View>
-      </View>
+      </TouchableOpacity>
       <TouchableOpacity
         style={[styles.registerText, styles.registerTextLayout]}
         onPress={() => navigation.navigate("RegisterPage1")}

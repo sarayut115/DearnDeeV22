@@ -26,6 +26,25 @@ export default function AccountScreen({ }) {
     });
     const [isEditing, setIsEditing] = useState(false);
 
+    // useEffect(() => {
+    //     const unsubscribe = db.collection('users')
+    //         .doc(auth.currentUser.uid)
+    //         .onSnapshot((doc) => {
+    //             if (doc.exists) {
+    //                 const userData = doc.data();
+    //                 setUserData(userData);
+    //                 calculateAge(userData.dateOfBirth); // เรียกใช้ฟังก์ชัน calculateAge ด้วยวันเกิดที่ได้มา
+    //             } else {
+    //                 console.log('No such document!');
+    //             }
+    //         });
+
+    //     // Cleanup function
+    //     return () => {
+    //         unsubscribe();
+    //     };
+    // }, []);
+
     useEffect(() => {
         const unsubscribe = db.collection('users')
             .doc(auth.currentUser.uid)
@@ -33,17 +52,20 @@ export default function AccountScreen({ }) {
                 if (doc.exists) {
                     const userData = doc.data();
                     setUserData(userData);
-                    calculateAge(userData.dateOfBirth); // เรียกใช้ฟังก์ชัน calculateAge ด้วยวันเกิดที่ได้มา
+                    if (userData.dateOfBirth) {
+                        calculateAge(userData.dateOfBirth);
+                    }
                 } else {
                     console.log('No such document!');
                 }
             });
-
+    
         // Cleanup function
         return () => {
             unsubscribe();
         };
     }, []);
+    
 
     const calculateAge = (dateOfBirth) => {
         const birthDate = new Date(dateOfBirth.seconds * 1000);
@@ -138,7 +160,7 @@ export default function AccountScreen({ }) {
                         contentFit="cover"
                         source={require("../../assets/latestpic.png")}
                     />
-                    <TouchableOpacity style={[styles.button, styles.bg3Layout]} onPress={openEditPopup}>
+                    <TouchableOpacity style={[styles.button, styles.bg3Layout]} onPress={() => navigation.navigate("PersonalInformationScreen")}>
                         <View style={[styles.bg3, styles.bg3Layout]}>
                             <LinearGradient
                                 style={[
@@ -165,7 +187,7 @@ export default function AccountScreen({ }) {
                         <View style={[styles.title, styles.titlePosition]}>
                             <Text style={[styles.text6, styles.text6Position]}>บัญชี</Text>
                         </View>
-                        <TouchableOpacity style={[styles.personalData1, styles.iconProfileLayout]}>
+                        <TouchableOpacity style={[styles.personalData1, styles.iconProfileLayout]} onPress={() => navigation.navigate("PersonalInformationScreen")}>
                             <Image
                                 style={[styles.iconProfile, styles.iconProfileLayout]}
                                 contentFit="cover"
@@ -182,14 +204,14 @@ export default function AccountScreen({ }) {
                                 source={require("../../assets/iconarrow.png")}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.achievement, styles.iconProfileLayout]}>
+                        <TouchableOpacity style={[styles.achievement, styles.iconProfileLayout]} onPress={() => navigation.navigate("Safety")}>
                             <Image
                                 style={[styles.iconProfile, styles.iconProfileLayout]}
                                 contentFit="cover"
                                 source={require("../../assets/iconachievement.png")}
                             />
                             <View style={[styles.text9, styles.textPosition]}>
-                                <Text style={[styles.text8, styles.textTypo]}>ความสำเร็จ</Text>
+                                <Text style={[styles.text8, styles.textTypo]}>บัญชีและความปลอดภัย</Text>
                             </View>
                             <Image
                                 style={[styles.iconArrow, styles.iconLayout]}
@@ -197,10 +219,10 @@ export default function AccountScreen({ }) {
                                 source={require("../../assets/iconarrow.png")}
                             />
                         </TouchableOpacity>
-                        <TouchableOpacity style={[styles.activityHistory, styles.iconProfileLayout]}>
+                        <TouchableOpacity style={[styles.activityHistory, styles.iconProfileLayout]} onPress={() => navigation.navigate("ประวัติ")}>
                             <View style={[styles.text11, styles.textPosition]}>
                                 <Text style={[styles.text8, styles.textTypo]}>
-                                    ประวัตการใช้งาน
+                                    ประวัติการใช้งาน
                                 </Text>
                             </View>
                             <Image
@@ -605,9 +627,9 @@ const styles = StyleSheet.create({
     },
     name: {
         left: 70,
-        width: 160,
+        width: 180,
         height: 44,
-        // // //backgroundColor:'red',
+        // backgroundColor:'red',
     },
     latestPicIcon: {
         width: 55,

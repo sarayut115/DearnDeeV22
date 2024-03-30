@@ -49,6 +49,7 @@ const RegisterPage = () => {
 
     if (dayChanged) {
       setShowDatePicker(false);
+      console.log(dateOfBirth)
     }
 
     setDateOfBirth(currentDate);
@@ -87,7 +88,7 @@ const RegisterPage = () => {
         });
 
         console.log("User profile updated successfully!");
-        navigation.navigate("SuccessRegistration")
+        navigation.navigate("MainContainer")
       } else {
         console.error("User not found");
       }
@@ -100,8 +101,8 @@ const RegisterPage = () => {
   return (
     <View style={styles.registerPage2}>
       <View style={styles.profileText}>
-        <Text style={styles.text}>มาสร้างโปรไฟล์ของคุณให้สมบูรณ์กันเถอะ</Text>
-        <Text style={styles.text1}>มันจะช่วยให้เรารู้จักคุณมากขึ้น!</Text>
+        <Text style={styles.text}>ป้อนข้อมูลส่วนตัวของคุณ</Text>
+        <Text style={styles.text1}>สำหรับการวิเคราะห์โหมดออโต้ เพื่อให้แม่นยำมากขึ้น!</Text>
 
       </View>
       <Pressable
@@ -115,7 +116,7 @@ const RegisterPage = () => {
           colors={["#92a3fd", "#9dceff"]}
         />
         <View style={styles.next}>
-          <TouchableOpacity style={styles.next1}>
+          <TouchableOpacity style={styles.next1} onPress={updateDBfirebase}>
             <Text style={styles.next1}>ยืนยัน</Text>
           </TouchableOpacity>
           <Image
@@ -506,13 +507,13 @@ const styles = StyleSheet.create({
     textAlign: "left",
     fontFamily: FontFamily.titleH4Bold,
     fontWeight: "700",
-    left: 0,
+    left: 60,
     top: 0,
     position: "absolute",
   },
   text1: {
     top: 36,
-    left: 72,
+    left: 20,
     color: Color.gray1,
     textAlign: "center",
     lineHeight: 18,

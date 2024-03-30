@@ -9,11 +9,15 @@ import ControlScreen from "../LoggedIn/ControlScreen";
 import { Image } from "expo-image";
 import { LinearGradient } from "expo-linear-gradient";
 import { useNavigation } from "@react-navigation/native";
+import { firebase } from '../config';
 
 const Tab = createBottomTabNavigator();
 
 const MainContainer = ({ }) => {
   const navigation = useNavigation();
+  const db = firebase.firestore();
+  const auth = firebase.auth();
+  const realtimeDB = firebase.database();
 
   return (
     <>
@@ -67,6 +71,7 @@ const MainContainer = ({ }) => {
                 // onPress={handleAddDevice}
                 // onPress={() => navigation.navigate("HomeScreen", { isModalVisible: true })}
                 style={{ marginRight: 15 }}
+                onPress={() => navigation.navigate('NotificationScreen')}
               >
                 {/* <Ionicons name="add-circle-outline" size={35} color="#00b4d8" /> */}
                 <Image source={require("../assets/notification.png")} style={{ width: 150, height: 150, marginRight: -50, marginTop: 20 }} />
@@ -96,6 +101,13 @@ const MainContainer = ({ }) => {
               fontSize: 18,
               fontWeight: "bold",
             },
+            // headerStyle: {
+            //   elevation: 0, // ลบ shadow ของ header
+            //   borderBottomWidth: 1, // เพิ่มเส้นขอบด้านล่างของ header
+            //   borderBottomColor: '#ccc', // สีของเส้นขอบด้านล่างของ header
+            //   height: 100,
+            // },
+
           }}
         />
 

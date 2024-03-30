@@ -9,14 +9,16 @@ import { Border, Color, FontFamily, FontSize, Padding } from "../GlobalStyles";
 import { firebase } from '../config';
 import { useNavigation } from "@react-navigation/native";
 import AsyncStorage from '@react-native-async-storage/async-storage';
-
+import { Icon } from "react-native-elements";
+import { FontAwesome } from '@expo/vector-icons';
 
 
 // import MQTT from 'react-native-mqtt';
 
 
 
-const ControlScreen = () => {
+const ControlScreen = ({ route }) => {
+
     // // MQTT client configuration
     // const client = new MQTT.Client('34.73.215.67', 1883, 'clientId');
 
@@ -38,20 +40,24 @@ const ControlScreen = () => {
     //     }
     // };
 
+    const { deviceId, deviceName } = route.params;
+
     const navigation = useNavigation();
+    const auth = firebase.auth();
+    const db = firebase.firestore();
     const realtimeDB = firebase.database();
 
     const [isOn, setIsOn] = useState(false);
 
     const [isVectorActive, setIsVectorActive] = useState(false);
-    const [isRimentalHealthFillActive, setIsRimentalHealthFillActive] = useState(false);
     const [isMaterialSymbolshdrAutoActive, setIsMaterialSymbolshdrAutoActive] = useState(false);
+    const [isRimentalHealthFillActive, setIsRimentalHealthFillActive] = useState(false);
 
     const [value, setValue] = useState(0);
 
     const [isDeviceOn, setIsDeviceOn] = useState(true); // เพิ่มตัวแปรเพื่อตรวจสอบว่าอุปกรณ์เปิดหรือปิด
 
-    const [sliderValue, setSliderValue] = useState(50); // ค่าเริ่มต้นของสไลด์
+    const [sliderValue, setSliderValue] = useState(0); // ค่าเริ่มต้นของสไลด์
 
     useEffect(() => {
         // เมื่อค่า isOn เปลี่ยนแปลง ตรวจสอบว่าอุปกรณ์เปิดหรือปิด
@@ -59,9 +65,47 @@ const ControlScreen = () => {
         setValue(0);
         console.log('=====')
         console.log(isDeviceOn, 'asdasd')
-        console.log(isOn)
+        setIsVectorActive(false)
+        setIsMaterialSymbolshdrAutoActive(false)
+        setIsRimentalHealthFillActive(false)
+        // console.log(isRimentalHealthFillActive)
+        // console.log(deviceId)
+        // console.log(deviceName)
+        console.log('=====')
     }, [isOn]);
 
+
+    useEffect(() => {
+        if (isOn) {
+            const fetchModeFromFirebase = async () => {
+                try {
+                    const modeSnapshot = await realtimeDB.ref('test/Mode').once('value');
+                    const mode = modeSnapshot.val();
+                    
+                    // ตั้งค่าตาม mode ที่ได้รับมา
+                    if (mode === 1) {
+                        setIsVectorActive(true);
+                        setIsMaterialSymbolshdrAutoActive(false);
+                        setIsRimentalHealthFillActive(false);
+                    } else if (mode === 2) {
+                        setIsVectorActive(false);
+                        setIsMaterialSymbolshdrAutoActive(true);
+                        setIsRimentalHealthFillActive(false);
+                    } else if (mode === 3) {
+                        setIsVectorActive(false);
+                        setIsMaterialSymbolshdrAutoActive(false);
+                        setIsRimentalHealthFillActive(true);
+                    }
+                } catch (error) {
+                    console.error('Error fetching mode from Firebase:', error);
+                }
+            };
+    
+            fetchModeFromFirebase();
+        }
+    }, [isOn]);
+
+    
 
     // const handleVectorPress = () => {
     //     setIsVectorActive(true);
@@ -113,6 +157,19 @@ const ControlScreen = () => {
     }, [isOn]);
 
 
+    // const handleVectorPress = async () => {
+    //     setIsVectorActive(true);
+    //     setIsRimentalHealthFillActive(false);
+    //     setIsMaterialSymbolshdrAutoActive(false);
+    //     try {
+    //         await AsyncStorage.setItem('isVectorActive', 'true');
+    //         await AsyncStorage.setItem('isRimentalHealthFillActive', 'false');
+    //         await AsyncStorage.setItem('isMaterialSymbolshdrAutoActive', 'false');
+    //     } catch (error) {
+    //         console.error('Error saving button state to AsyncStorage:', error);
+    //     }
+    // };
+
     const handleVectorPress = async () => {
         setIsVectorActive(true);
         setIsRimentalHealthFillActive(false);
@@ -124,7 +181,14 @@ const ControlScreen = () => {
         } catch (error) {
             console.error('Error saving button state to AsyncStorage:', error);
         }
+        setValue(1); // เปลี่ยนค่า value เป็น 1
+        setSliderValue(20); // เปลี่ยนค่า sliderValue เป็น 20
+
+        // Update Firebase Realtime Database
+        realtimeDB.ref('test/intensity').set(1); // อัปเดต 'test/intensity' เป็น 1
+        realtimeDB.ref('test/frequency').set(20); // อัปเดต 'test/frequency' เป็น 20
     };
+
 
     const handleRimentalHealthFillPress = async () => {
         setIsVectorActive(false);
@@ -150,6 +214,12 @@ const ControlScreen = () => {
         } catch (error) {
             console.error('Error saving button state to AsyncStorage:', error);
         }
+        setValue(3);
+        setSliderValue(50);
+
+        // Update Firebase Realtime Database
+        realtimeDB.ref('test/intensity').set(3); // อัปเดต 'test/intensity' เป็น 1
+        realtimeDB.ref('test/frequency').set(50); // อัปเดต 'test/frequency' เป็น 20
     };
 
     // Load button state from AsyncStorage when component mounts
@@ -169,7 +239,6 @@ const ControlScreen = () => {
 
         loadButtonState();
     }, []);
-
 
 
     // บันทึกค่า sliderValue ลงใน AsyncStorage เมื่อมีการเปลี่ยนแปลง
@@ -226,6 +295,26 @@ const ControlScreen = () => {
         }
     }, [isOn, realtimeDB]);  // เพิ่ม isOn เข้าไปใน dependency array ของ useEffect เพื่อให้ useEffect ทำงานเมื่อมีการเปลี่ยนแปลงค่า isOn
 
+    // useEffect(() => {
+    //     // เมื่อค่า isOn เปลี่ยนและมีค่าเป็น true
+
+    //         // Subscribe to changes in the Firebase database
+    //         const dbRef = realtimeDB.ref('test/frequency');
+    //         const onDataChange = (snapshot) => {
+    //             const frequencyValue = snapshot.val();
+    //             if (frequencyValue !== null) {
+    //                 setSliderValue(frequencyValue);
+    //             }
+    //         };
+
+    //         dbRef.on('value', onDataChange);
+
+    //         return () => {
+    //             dbRef.off('value', onDataChange);
+    //         };
+
+    // }, [ realtimeDB]);  // เพิ่ม isOn เข้าไปใน dependency array ของ useEffect เพื่อให้ useEffect ทำงานเมื่อมีการเปลี่ยนแปลงค่า isOn
+
 
     const handlePress = (newValue) => {
         // Update the local state
@@ -239,19 +328,86 @@ const ControlScreen = () => {
     };
 
 
+    // const handlePressIsOnOff = async () => {
+    //     const newIsOn = !isOn;
+    //     setIsOn(newIsOn);
+    // };
+
+    // const handlePressIsOnOff = async () => {
+    //     const newIsOn = !isOn;
+    //     setIsOn(newIsOn);
+
+    //     try {
+    //         const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+    //         const userDoc = await userDocRef.get();
+    //         const userData = userDoc.data();
+    //         if (userData && userData.devicesAll) {
+    //             const updatedDevicesAll = userData.devicesAll.map((d) => {
+    //                 if (d.id === deviceId) {
+    //                     // เพิ่มประวัติการใช้งานลงใน History
+    //                     const updatedHistory = d.History ? [...d.History, { isOn: newIsOn, timestamp: new Date() }] : [{ isOn: newIsOn, timestamp: new Date() }];
+    //                     return { ...d, History: updatedHistory };
+    //                 }
+    //                 return d;
+    //             });
+    //             await userDocRef.update({ devicesAll: updatedDevicesAll });
+    //             console.log("History updated successfully!");
+    //         }
+    //     } catch (error) {
+    //         console.error('Error updating history:', error);
+    //     }
+    // };
+
+
     const handlePressIsOnOff = async () => {
         const newIsOn = !isOn;
         setIsOn(newIsOn);
+    
+        // เลือก mode ตามค่าที่เปลี่ยนแปลง
+        let mode = 0;
+        if (isVectorActive) {
+            mode = 1;
+        } else if (isMaterialSymbolshdrAutoActive) {
+            mode = 2;
+        } else if (isRimentalHealthFillActive) {
+            mode = 3;
+        }
+    
+        try {
+            const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+            const userDoc = await userDocRef.get();
+            const userData = userDoc.data();
+            if (userData && userData.devicesAll) {
+                const updatedDevicesAll = userData.devicesAll.map((d) => {
+                    if (d.id === deviceId) {
+                        // เพิ่มประวัติการใช้งานลงใน History
+                        const updatedHistory = d.History ? [...d.History, { isOn: newIsOn, timestamp: new Date() }] : [{ isOn: newIsOn, timestamp: new Date() }];
+                        return { ...d, History: updatedHistory };
+                    }
+                    return d;
+                });
+    
+                // อัปเดตค่า mode ลงใน Firebase Realtime Database
+                await userDocRef.update({ devicesAll: updatedDevicesAll });
+                realtimeDB.ref('test/Mode').set(mode);
+    
+                console.log("History updated successfully!");
+            }
+        } catch (error) {
+            console.error('Error updating history:', error);
+        }
     };
+    
+
+
 
 
     const renderItem = ({ item }) => (
         <TouchableOpacity
-            disabled={!isDeviceOn} // ปิดใช้งานปุ่มเมื่ออุปกรณ์ปิด
+            disabled={!isDeviceOn || !isRimentalHealthFillActive} // ปิดใช้งานปุ่มเมื่ออุปกรณ์ปิดหรือ isRimentalHealthFillActive เป็น false
             style={[
                 styles.button,
                 styles.flatListItem,
-                // { backgroundColor: item === value ? '#3498db' : '#2c3e50' },
                 { backgroundColor: item === value ? '#3498db' : '#A0A0A0' },
             ]}
             onPress={() => handlePress(item)}>
@@ -272,14 +428,17 @@ const ControlScreen = () => {
                             source={require("../assets/group-9845.png")}
                         />
                     </TouchableOpacity>
-                    <Image
-                        style={[styles.detailNavsIcon, styles.iconLayout]}
-                        contentFit="cover"
-                        source={require("../assets/detailnavs.png")}
-                    />
+                    <TouchableOpacity onPress={() => navigation.navigate("SettingDevice")}>
+                        <Image
+                            style={[styles.detailNavsIcon, styles.iconLayout]}
+                            contentFit="cover"
+                            source={require("../assets/detailnavs.png")}
+                        />
+                    </TouchableOpacity>
+
                     <View style={styles.title}>
-                        <Text style={[styles.text, styles.textFlexBox]}>
-                            เครื่องกระตุ้นกระแสไฟฟ้า
+                        <Text style={[styles.text]}>
+                            {deviceId}.{deviceName}
                         </Text>
                     </View>
                 </View>
@@ -330,8 +489,6 @@ const ControlScreen = () => {
                             style={styles.vectorIcon}
                             contentFit="cover"
                             source={isVectorActive ? require("../assets/vector1.png") : require("../assets/vector.png")}
-
-
                         />
                     </TouchableOpacity>
 
@@ -359,15 +516,18 @@ const ControlScreen = () => {
                     {/* <Text style={[styles.text2, styles.textTypo, isMaterialSymbolshdrAutoActive && { color: '#A0A0A0' }]}>อัตโนมัติ</Text>
                 <Text style={[styles.text3, styles.textTypo, isVectorActive && { color: '#A0A0A0' }]}>ทั่วไป</Text>
                 <Text style={[styles.text4, isRimentalHealthFillActive && { color: '#A0A0A0' }]}>ปรับขั้นสูง</Text> */}
-                    <Text style={[styles.text2, styles.textTypo, { color: isMaterialSymbolshdrAutoActive ? 'black' : '#A0A0A0' }]}>อัตโนมัติ</Text>
-                    <Text style={[styles.text3, styles.textTypo, { color: isVectorActive ? 'black' : '#A0A0A0' }]}>ผ่อนคลาย</Text>
-                    <Text style={[styles.text4, { color: isRimentalHealthFillActive ? 'black' : '#A0A0A0' }]}>ปรับขั้นสูง</Text>
+                    <Text style={[styles.text2, styles.textTypo, { color: isMaterialSymbolshdrAutoActive ? 'black' : '#A0A0A0' }]}>อัตโนมัติ {!isOn && <FontAwesome name="lock" size={18} />} </Text>
+                    <Text style={[styles.text3, styles.textTypo, { color: isVectorActive ? 'black' : '#A0A0A0' }]}>ผ่อนคลาย {!isOn && <FontAwesome name="lock" size={18} />}</Text>
+                    <Text style={[styles.text4, { color: isRimentalHealthFillActive ? 'black' : '#A0A0A0' }]}>ปรับขั้นสูง {!isOn && <FontAwesome name="lock" size={18} />}</Text>
 
 
                 </View>
 
                 <View style={[styles.homesceen1Child, styles.parentLayout, { justifyContent: 'center', alignItems: 'center' }]}>
-                    <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความแรง</Text>
+                    <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความแรง {' '}
+                        {isVectorActive && <FontAwesome name="lock" size={22} />}
+                        {isMaterialSymbolshdrAutoActive && <FontAwesome name="lock" size={22} />}
+                    </Text>
                     <FlatList
                         data={[1, 2, 3, 4, 5]}
                         renderItem={renderItem}
@@ -378,9 +538,12 @@ const ControlScreen = () => {
                 </View>
 
                 <View style={[styles.homesceen1Item, styles.homesceen1Layout]} >
-                    <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความถี่ </Text>
+                    <Text style={[styles.text, { alignSelf: 'flex-start', fontSize: 18, fontWeight: 'bold', marginLeft: 10, marginTop: 4 }]}>ปรับความถี่ {' '}
+                        {isVectorActive && <FontAwesome name="lock" size={22}  />}
+                        {isMaterialSymbolshdrAutoActive && <FontAwesome name="lock" size={22} />}
+                    </Text>
                     <Text style={styles.sliderValue}>{sliderValue}</Text>
-                    <Slider
+                    {/* <Slider
                         style={styles.slider}
                         disabled={!isDeviceOn}
                         minimumValue={20}
@@ -391,7 +554,25 @@ const ControlScreen = () => {
                         thumbTintColor="#3498db" // สีของจุดที่ใช้เลื่อน Slider
                         minimumTrackTintColor="#3498db" // สีของเส้นเส้นสำหรับช่วงที่เลื่อนไปแล้ว
                         maximumTrackTintColor="#A0A0A0" // สีของเส้นเส้นสำหรับช่วงที่ยังไม่ได้เลื่อนไป
+                    /> */}
+                    <Slider
+                        style={styles.slider}
+                        disabled={!isDeviceOn || !isRimentalHealthFillActive} // ปิดใช้งานเมื่ออุปกรณ์ปิดหรือ isRimentalHealthFillActive เป็นเท็จ
+                        minimumValue={20}
+                        maximumValue={70}
+                        step={10}
+                        value={sliderValue}
+                        onValueChange={(value) => {
+                            setSliderValue(value); // อัปเดตค่าสไลด์เดอร์ในสถานะท้องถิ่น
+                            if (isRimentalHealthFillActive) {
+                                realtimeDB.ref('test/frequency').set(value); // อัปเดต Firebase Realtime Database เมื่อ isRimentalHealthFillActive เป็นจริง
+                            }
+                        }}
+                        thumbTintColor="#3498db"
+                        minimumTrackTintColor="#3498db"
+                        maximumTrackTintColor="#A0A0A0"
                     />
+
                     {/* <Text style={styles.sliderValue}>{sliderValue}</Text> */}
                 </View>
                 <View style={[styles.homesceen1Inner, styles.homesceen1Layout]} />
@@ -407,6 +588,11 @@ const ControlScreen = () => {
                             <Text style={[styles.textAA, styles.textPositionAA]}>80 %</Text>
                         </View>
                     </View>
+                    <View style={styles.bannerPie1AAA}>
+                        <View style={styles.bannerPieTextAAA}>
+                            <Text style={[styles.textAA, styles.textPositionAA]}>80 %</Text>
+                        </View>
+                    </View>
                     <View style={styles.action}>
                         <View style={[styles.scheduleBgAA, styles.scheduleChildPositionAA]}>
                             <LinearGradient
@@ -417,7 +603,7 @@ const ControlScreen = () => {
                         </View>
                         <View style={styles.workoutScheduleTextAA}>
                             <Text style={[styles.todayTargetAA, styles.textPositionAA]}>
-                                เครื่องสามารถใช้ได้อีกประมาณ
+                                อีกประมาณ
                             </Text>
                         </View>
                         <View style={styles.buttonCheckAA}>
@@ -431,15 +617,59 @@ const ControlScreen = () => {
                             <View style={styles.buttonTextAA}>
                                 <Text style={[styles.checkAA, styles.checkClrAA]}>1 ชม.</Text>
                             </View>
+
                         </View>
                     </View>
-                    <LinearGradient
+                    <View style={styles.actionSensor}>
+                        <View style={[styles.scheduleBgAA, styles.scheduleChildPositionAA]}>
+                            <LinearGradient
+                                style={[styles.scheduleBgChildAA, styles.scheduleChildPositionAA]}
+                                locations={[0, 1]}
+                                colors={["#92a3fd", "#9dceff"]}
+                            />
+                        </View>
+                        <View style={styles.workoutScheduleTextAA}>
+                            <Text style={[styles.todayTargetAA, styles.textPositionAA]}>
+                                อีกประมาณ
+                            </Text>
+                        </View>
+                        <View style={styles.buttonCheckAA}>
+                            <View style={[styles.scheduleBgAA, styles.scheduleChildPositionAA]}>
+                                <LinearGradient
+                                    style={[styles.buttonBgChildAA, styles.buttonLayoutAA]}
+                                    locations={[0, 1]}
+                                    colors={["#92a3fd", "#9dceff"]}
+                                />
+                            </View>
+                            <View style={styles.buttonTextAA}>
+                                <Text style={[styles.checkAA, styles.checkClrAA]}>1 ชม.</Text>
+                            </View>
+
+                        </View>
+
+                    </View>
+                    {/* <LinearGradient
                         style={[styles.button1AA, styles.buttonLayoutAA]}
                         locations={[0, 1]}
                         colors={["#c58bf2", "#eea4ce"]}
                     >
                         <Text style={[styles.buttonAA, styles.checkClrAA]}>แบตเตอรี่</Text>
+                    </LinearGradient> */}
+                    <LinearGradient
+                        style={[styles.button1AAStim]}
+                        locations={[0, 1]}
+                        colors={["#c58bf2", "#eea4ce"]}
+                    >
+                        <Text style={[styles.buttonAA, styles.checkClrAA]}>ตัวกระตุ้น</Text>
                     </LinearGradient>
+                    <LinearGradient
+                        style={[styles.button1AASensor]}
+                        locations={[0, 1]}
+                        colors={["#c58bf2", "#eea4ce"]}
+                    >
+                        <Text style={[styles.buttonAA, styles.checkClrAA]}>ตัวรับแรงกด</Text>
+                    </LinearGradient>
+
                 </LinearGradient>
 
             </View>
@@ -461,11 +691,6 @@ const styles = StyleSheet.create({
         paddingHorizontal: 22, // ปรับระยะห่างด้านซ้ายและด้านขวา
         borderRadius: 15, // ปรับขนาดของมุม
         marginTop: -12,
-    },
-
-    textFlexBox: {
-        textAlign: "left",
-        position: "absolute",
     },
     parentLayout: {
         // width: 334,
@@ -552,6 +777,9 @@ const styles = StyleSheet.create({
         height: 32,
         position: "absolute",
     },
+    detailnavs: {
+
+    },
     detailNavsIcon: {
         width: "10.16%",
         left: "89.84%",
@@ -568,14 +796,16 @@ const styles = StyleSheet.create({
         fontSize: 17,
         fontFamily: FontFamily.titleH2Bold,
         color: Color.blackColor,
-        textAlign: "left",
+        alignSelf: "center",
+        justifyContent: 'center',
+        alignItems: 'center',
         left: 0,
         top: 0,
     },
     title: {
         top: 6,
-        left: 72,
-        width: 185,
+        left: 50,
+        width: 230,
         height: 24,
         position: "absolute",
         // backgroundColor: 'red'
@@ -664,7 +894,7 @@ const styles = StyleSheet.create({
     },
     text3: {
         left: "8.5%",
-        width: "19.46%",
+        width: "22.46%",
     },
     text4: {
         top: "72.82%",
@@ -674,7 +904,7 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         lineHeight: 21,
         fontSize: FontSize.textMediumTextRegular_size,
-        width: "19.46%",
+        width: "22.46%",
         textAlign: "left",
         position: "absolute",
     },
@@ -834,11 +1064,19 @@ const styles = StyleSheet.create({
     },
     action: {
         top: 152,
-        width: 299,
+        width: 150,
         height: 57,
         borderRadius: 22,
         backgroundColor: Color.whiteColor,
         left: 17,
+    },
+    actionSensor: {
+        top: 95,
+        width: 150,
+        height: 57,
+        borderRadius: 22,
+        backgroundColor: Color.whiteColor,
+        left: 185,
     },
     rectangleParent: {
         top: 85,
@@ -940,13 +1178,35 @@ const styles = StyleSheet.create({
         position: "absolute",
     },
 
+    bannerPieTextAAA: {
+        height: "20.48%",
+        width: "40%",
+        top: "39.76%",
+        right: "29.16%",
+        bottom: "39.76%",
+        left: "32%", // ปรับค่า left ลงเพื่อขยับไปทางซ้ายจอ
+        position: "absolute",
+    },
+
     bannerPie1AA: {
         height: 100,
         width: 100,
         top: "21%",
         right: "32.72%",
         bottom: "33.74%",
-        left: "34.73%",
+        left: "60.73%",
+        position: "absolute",
+        borderRadius: 50, // ค่าความสูงและความกว้างหาร 2
+        backgroundColor: 'white',
+    },
+
+    bannerPie1AAA: {
+        height: 100,
+        width: 100,
+        top: "21%",
+        right: "32.72%",
+        bottom: "33.74%",
+        left: "10.73%",
         position: "absolute",
         borderRadius: 50, // ค่าความสูงและความกว้างหาร 2
         backgroundColor: 'white',
@@ -981,12 +1241,13 @@ const styles = StyleSheet.create({
     },
     workoutScheduleTextAA: {
         height: "36.84%",
-        width: "60%",
+        width: "47%",
         top: "31.58%",
         right: "37.79%",
         bottom: "31.58%",
-        left: "6.35%",
+        left: "9.35%",
         position: "absolute",
+        // backgroundColor:'red'
     },
     buttonBgChildAA: {
         left: "0%",
@@ -1016,14 +1277,15 @@ const styles = StyleSheet.create({
     },
     buttonCheckAA: {
         height: "49.12%",
-        width: "21.57%",
+        width: "36.57%",
         top: "26.32%",
         right: "6.35%",
         bottom: "24.56%",
-        left: "72.07%",
+        left: "60.07%",
         position: "absolute",
-
+        // backgroundColor:'green'
     },
+
     actionAA: {
         top: 152,
         left: 17,
@@ -1041,16 +1303,50 @@ const styles = StyleSheet.create({
     },
     button1AA: {
         marginTop: -102.5,
-        width: "38.32%",
-        top: "50%",
+        width: "25.32%",
+        top: "65%",
         right: "29.34%",
-        left: "32.34%",
+        left: "37.34%",
         height: 32,
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
         paddingHorizontal: Padding.p_11xl,
         paddingVertical: Padding.p_3xs,
+    },
+    button1AAStim: {
+        marginTop: -102.5,
+        width: "25.32%",
+        top: "50%",
+        right: "29.34%",
+        left: "12.34%",
+        height: 32,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: Padding.p_11xl,
+        paddingVertical: Padding.p_3xs,
+        borderRadius: 15,
+        backgroundColor: Color.waterIntakeLinear,
+        position: "absolute",
+        justifyContent: "center"
+    },
+    button1AASensor: {
+        marginTop: -102.5,
+        width: "25.32%",
+        top: "50%",
+        right: "29.34%",
+        left: "62.34%",
+        height: 32,
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "space-between",
+        paddingHorizontal: Padding.p_11xl,
+        paddingVertical: Padding.p_3xs,
+        borderRadius: 15,
+        backgroundColor: Color.waterIntakeLinear,
+        position: "absolute",
+        justifyContent: "center"
     },
     bannerPie1ParentAA: {
         top: 85,

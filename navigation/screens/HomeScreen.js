@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { ScrollView, Text, StyleSheet, View, Image, TouchableOpacity, Modal, TextInput, Button, Alert } from 'react-native';
 import { useNavigation } from "@react-navigation/native";
 import { firebase } from '../../config';
 import { LinearGradient } from "expo-linear-gradient";
 import { FontFamily, FontSize, Color, Border } from "../../GlobalStyles";
+import { Ionicons } from "@expo/vector-icons";
 
 // const devices = [
 //   { id: 1, name: 'เครื่องกระตุ้นกระแสไฟฟ้า', image: require('../../assets/fes-leg.png'), online: true },
@@ -21,7 +22,8 @@ const HomeScreen = () => {
 
   const [devices, setDevices] = useState([]);
 
-  const [deviceName, setDeviceName] = useState('เครื่องกระตุ้นกระแสไฟฟ้า');
+  const [deviceName, setDeviceName] = useState('เครื่องกระตุ้นกระแสไฟฟ้า'); // เปลี่ยนค่าเริ่มต้นเป็นค่าว่าง
+
   const [wifiName, setWifiName] = useState('');
   const [wifiPassword, setWifiPassword] = useState('');
   const [deviceStatus, setDeviceStatus] = useState(false);
@@ -35,12 +37,12 @@ const HomeScreen = () => {
       .doc(auth.currentUser.uid)
       .onSnapshot(snapshot => {
         const userData = snapshot.data();
-        console.log(userData,'asdasdas')
+        // console.log(userData, 'asdasdas')
         if (userData && userData.devices) {
           setDevices(userData.devices);
         }
       });
-      
+
 
     return () => {
       unsubscribe(); // Cleanup function to unsubscribe from the snapshot listener
@@ -52,7 +54,7 @@ const HomeScreen = () => {
   useEffect(() => {
     const checkDeviceStatus = () => {
       try {
-        const deviceStatusRef = realtimeDB.ref('/test/checkM5');
+        const deviceStatusRef = realtimeDB.ref('/test/isOn');
         deviceStatusRef.on('value', (snapshot) => {
           const value = snapshot.val();
           if (value === 1) {
@@ -80,39 +82,106 @@ const HomeScreen = () => {
     setIsModalVisible(true);
   };
 
+  // const handleSaveDevice = async () => {
+  //   try {
+  //     const newDevice = {
+  //       id: devices.length + 1,
+  //       name: deviceName,
+  //       statusDevice: deviceStatus,
+  //       image: imageURL, // Set default image URL
+  //       wifiName: wifiName,
+  //       wifiPassword: wifiPassword
+  //       // Add other properties as needed
+
+  //     };
+
+  //     const newDeviceHis = {
+  //       id: devices.length + 1,
+  //       name: deviceName,
+  //       statusDevice: true,
+  //       image: imageURL, // Set default image URL
+  //       wifiName: wifiName,
+  //       wifiPassword: wifiPassword
+  //       // Add other properties as needed
+
+  //     };
+
+  //     console.log(deviceName, 'asdasdasdasdasdasdasdasdasasdasdasdasd');
+  //     await db.collection('users')
+  //       .doc(auth.currentUser.uid)
+  //       .update({
+  //         devices: firebase.firestore.FieldValue.arrayUnion(newDevice),
+  //         devicesAll: firebase.firestore.FieldValue.arrayUnion(newDeviceHis) // Update devicesAll field
+  //       });
+
+  //     console.log("เพิ่มอุปกรณ์เรียบร้อย!");
+  //     Alert.alert('สำเร็จ', 'เพิ่มอุปกรณ์เรียบร้อยแล้ว!');
+
+  //     setDevices([...devices, newDevice]);
+  //     setDeviceName('เครื่องกระตุ้นกระแสไฟฟ้า');
+  //     setWifiName('');
+  //     setWifiPassword('');
+  //     setIsModalVisible(false);
+  //   } catch (error) {
+  //     console.error('Error adding device:', error);
+  //   }
+  // };
+
   const handleSaveDevice = async () => {
     try {
+      let newId = 1; // กำหนดค่าเริ่มต้นของ id ใหม่
+
+      // ตรวจสอบว่ามี devicesAll ในฐานข้อมูลหรือไม่
+      const devicesAllRef = await db.collection('users').doc(auth.currentUser.uid).get();
+      const devicesAllData = devicesAllRef.data();
+
+      if (devicesAllData && devicesAllData.devicesAll) {
+        // หา id ที่มีค่ามากที่สุดใน devicesAll
+        const maxId = Math.max(...devicesAllData.devicesAll.map(device => device.id));
+        newId = maxId + 1; // กำหนด id ใหม่ให้เท่ากับ id ที่มีค่ามากที่สุด + 1
+      }
+
       const newDevice = {
-        id: devices.length + 1,
+        id: newId,
         name: deviceName,
         statusDevice: deviceStatus,
-        image: imageURL, // กำหนดรูปภาพเริ่มต้น
-        wifiName: wifiName, // เปลี่ยนชื่อ property เป็น wifiName ในที่นี้
+        image: imageURL, // Set default image URL
+        wifiName: wifiName,
         wifiPassword: wifiPassword
         // Add other properties as needed
-        
       };
-      //console.log(image);
 
+      const newDeviceHis = {
+        id: newId,
+        name: deviceName,
+        statusDevice: true,
+        image: imageURL, // Set default image URL
+        wifiName: wifiName,
+        wifiPassword: wifiPassword
+        // Add other properties as needed
+      };
+
+      console.log(deviceName, 'asdasdasdasdasdasdasdasdasasdasdasdasd');
       await db.collection('users')
-        .doc(auth.currentUser.uid) // ใช้ UID ของผู้ใช้เป็น document ID
+        .doc(auth.currentUser.uid)
         .update({
-          devices: firebase.firestore.FieldValue.arrayUnion(newDevice)
+          devices: firebase.firestore.FieldValue.arrayUnion(newDevice),
+          devicesAll: firebase.firestore.FieldValue.arrayUnion(newDeviceHis) // Update devicesAll field
         });
-      console.log("updated devices successfully!");
-      Alert.alert('สำเร็จ', 'อุปกรณ์ถูกเพิ่มแล้ว!');
+
+      console.log("เพิ่มอุปกรณ์เรียบร้อย!");
+      Alert.alert('สำเร็จ', 'เพิ่มอุปกรณ์เรียบร้อยแล้ว!');
 
       setDevices([...devices, newDevice]);
-      // รีเซ็ตค่าใน input
-      setDeviceName('');
+      setDeviceName('เครื่องกระตุ้นกระแสไฟฟ้า');
       setWifiName('');
       setWifiPassword('');
-
       setIsModalVisible(false);
     } catch (error) {
       console.error('Error adding device:', error);
     }
   };
+
 
 
   const showRemoveDeviceAlert = (device) => {
@@ -130,19 +199,52 @@ const HomeScreen = () => {
     );
   };
 
+  // const removeDevice = async (device) => {
+  //   try {
+  //     // แก้ไข collection และ document ตามโครงสร้างของข้อมูลของคุณ
+  //     await db.collection('users')
+  //       .doc(auth.currentUser.uid)
+  //       .update({
+  //         devices: firebase.firestore.FieldValue.arrayRemove(device)
+  //       });
+  //     console.log("Device removed successfully!");
+
+  //     // อัปเดต state โดยการกรองออกจาก devices ทั้งหมดที่ไม่ใช่อุปกรณ์ที่ถูกลบ
+  //     setDevices(devices.filter(item => item.id !== device.id));
+
+  //   } catch (error) {
+  //     console.error('Error removing device:', error);
+  //   }
+  // };
+
   const removeDevice = async (device) => {
     try {
-      // แก้ไข collection และ document ตามโครงสร้างของข้อมูลของคุณ
+      // ลบอุปกรณ์ออกจาก collection ของ users
       await db.collection('users')
         .doc(auth.currentUser.uid)
         .update({
-          devices: firebase.firestore.FieldValue.arrayRemove(device)
+          devices: firebase.firestore.FieldValue.arrayRemove(device),
         });
-      console.log("Device removed successfully!");
 
       // อัปเดต state โดยการกรองออกจาก devices ทั้งหมดที่ไม่ใช่อุปกรณ์ที่ถูกลบ
       setDevices(devices.filter(item => item.id !== device.id));
 
+      // หาอุปกรณ์ใน devicesAll และอัปเดต statusDevice เป็น true ถ้าพบ
+      const userDocRef = db.collection('users').doc(auth.currentUser.uid);
+      const userDoc = await userDocRef.get();
+      const userData = userDoc.data();
+      if (userData && userData.devicesAll) {
+        const updatedDevicesAll = userData.devicesAll.map((d) => {
+          if (d.id === device.id) {
+            return { ...d, statusDevice: false };
+          }
+          return d;
+        });
+        await userDocRef.update({ devicesAll: updatedDevicesAll });
+        console.log("StatusDevice updated successfully!");
+      }
+
+      console.log("Device removed successfully!");
     } catch (error) {
       console.error('Error removing device:', error);
     }
@@ -151,7 +253,7 @@ const HomeScreen = () => {
 
   const handleCancel = () => {
     // รีเซ็ตค่าใน input เมื่อยกเลิก
-    setDeviceName('');
+    setDeviceName('เครื่องกระตุ้นกระแสไฟฟ้า');
     setWifiName('');
     setWifiPassword('');
 
@@ -160,138 +262,153 @@ const HomeScreen = () => {
 
 
   return (
-    <ScrollView contentContainerStyle={styles.container}>
+    <View style={styles.container}>
+      <ScrollView contentContainerStyle={styles.scrollContainer}>
 
-      {devices.length === 0 ? (
-        <View style={styles.emptyContainer}>
-          <Text style={styles.emptyText}>ไม่มีอุปกรณ์ โปรดเพิ่มอุปกรณ์</Text>
-          <Image source={require('../../assets/empty-icon.png')} style={styles.emptyImage} />
-          {/* <TouchableOpacity style={styles.addButton} onPress={handleAddDevice}>
+        {devices.length === 0 ? (
+          <View style={styles.emptyContainer}>
+            <Text style={styles.emptyText}>ไม่มีอุปกรณ์ โปรดเพิ่มอุปกรณ์</Text>
+            <Image source={require('../../assets/empty-icon.png')} style={styles.emptyImage} />
+            {/* <TouchableOpacity style={styles.addButton} onPress={handleAddDevice}>
             <Text style={styles.addButtonText}>เพิ่มอุปกรณ์</Text>
           </TouchableOpacity> */}
-          <TouchableOpacity style={styles.buttonLargeRegister} onPress={handleAddDevice}>
-            <LinearGradient
-              style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
-              locations={[1, 0]}
-              colors={["#92A3FD", "#9DCEFF"]}
-            />
-            <Text style={[styles.register, styles.text3FlexBox]}>
-              เพิ่มอุปกรณ์
-            </Text>
-          </TouchableOpacity>
-        </View>
-      ) : (
-        <>
-
-          <Text style={styles.title}>อุปกรณ์ทั้งหมด</Text>
-
-          {devices.map(device => (
-            <TouchableOpacity key={device.id} style={styles.deviceContainer}
-              onPress={() => navigation.navigate("ControlScreen")}
-              onLongPress={() => showRemoveDeviceAlert(device)}
-            >
-              <Image source={{ uri: imageURL }}style={styles.deviceImage} />
-            
-              <View>
-                <Text style={[styles.deviceText]}>
-                  {device.name}
-                </Text>
-                <Text style={[styles.statusText, deviceStatus ? styles.onlineText : styles.offlineText]}>
-                  {deviceStatus ? 'ออนไลน์' : 'ออฟไลน์'}
-                </Text>
-              </View>
+            <TouchableOpacity style={styles.buttonLargeRegister} onPress={handleAddDevice}>
+              <LinearGradient
+                style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
+                locations={[1, 0]}
+                colors={["#92A3FD", "#9DCEFF"]}
+              />
+              <Text style={[styles.register, styles.text3FlexBox]}>
+                เพิ่มอุปกรณ์
+              </Text>
             </TouchableOpacity>
+          </View>
+        ) : (
+          <>
 
-          ))}
+            <Text style={styles.title}>อุปกรณ์ทั้งหมด</Text>
 
-          <TouchableOpacity style={styles.buttonLargeRegister} onPress={handleAddDevice}>
-            <LinearGradient
-              style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
-              locations={[1, 0]}
-              colors={["#92A3FD", "#9DCEFF"]}
-            />
-            <Text style={[styles.register, styles.text3FlexBox]}>
-              เพิ่มอุปกรณ์
-            </Text>
-          </TouchableOpacity>
-        </>
+            {devices.map(device => (
+              <TouchableOpacity key={device.id} style={styles.deviceContainer}
+                onPress={() => navigation.navigate("ControlScreen", { deviceId: device.id ,deviceName: device.name })}
+                onLongPress={() => showRemoveDeviceAlert(device)}
+              >
+                <View style={styles.deviceNameStatus}>
+                  <Image source={{ uri: imageURL }} style={styles.deviceImage} />
+                  <View>
+                    <Text style={[styles.deviceText]}>
+                      {device.id}: {device.name} {/* เพิ่ม id ของอุปกรณ์ด้วย */}
+                    </Text>
+                    <Text style={[styles.statusText, deviceStatus ? styles.onlineText : styles.offlineText]}>
+                      {deviceStatus ? 'ออนไลน์' : 'ออฟไลน์'}
+                    </Text>
+                  </View>
+                </View>
+                <View style={styles.deviceButton}>
+                  <Image source={require('../../assets/workoutbtn4.png')} style={styles.workoutbtn} />
+                </View>
+              </TouchableOpacity>
 
-      )}
+            ))}
 
-      {/* Modal for adding device */}
-      <Modal
-        animationType="slide"
-        transparent={true}
-        visible={isModalVisible}
-        onRequestClose={() => setIsModalVisible(false)}
-      >
-        <View style={styles.modalContainer}>
-          <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>เพิ่มอุปกรณ์</Text>
-            <Text style={styles.modalTitle1}>ชื่ออุปกรณ์</Text>
-            <TextInput
-              style={styles.input}
-              placeholder="ชื่ออุปกรณ์"
-              placeholderTextColor="gray"
-              onChangeText={text => setDeviceName(text)}
-              value={deviceName || 'เครื่องกระตุ้นกระแสไฟฟ้า'}
-            />
+            <TouchableOpacity style={styles.buttonLargeRegister} onPress={handleAddDevice}>
+              <LinearGradient
+                style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
+                locations={[1, 0]}
+                colors={["#92A3FD", "#9DCEFF"]}
+              />
+              <Text style={[styles.register, styles.text3FlexBox]}>
+                เพิ่มอุปกรณ์
+              </Text>
+            </TouchableOpacity>
+          </>
 
-            <TextInput
-              style={styles.input}
-              placeholder="ชื่อ WiFi"
-              placeholderTextColor="gray"
-              onChangeText={text => setWifiName(text)}
-              value={wifiName}
-            />
+        )}
 
-            <TextInput
-              style={styles.input}
-              placeholder="รหัสผ่าน WiFi"
-              placeholderTextColor="gray"
-              onChangeText={text => setWifiPassword(text)}
-              value={wifiPassword}
-              secureTextEntry={false} // แสดงเป็นตัวอักษรที่ถูกซ่อน
-            />
-            <Text style={styles.buttonText1}>หมายเหตุ: อุปกรณ์จะเชื่อมต่อกับ WiFi ที่ผู้ใช้กรอกอัตโนมัติ</Text>
-            <View style={styles.buttonContainer}>
-              {/* <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSaveDevice}>
+        {/* Modal for adding device */}
+        <Modal
+          animationType="slide"
+          transparent={true}
+          visible={isModalVisible}
+          onRequestClose={() => setIsModalVisible(false)}
+        >
+          <View style={styles.modalContainer}>
+            <View style={styles.modalContent}>
+              <Text style={styles.modalTitle}>เพิ่มอุปกรณ์</Text>
+              <Text style={styles.modalTitle1}>ชื่ออุปกรณ์</Text>
+              <TextInput
+                style={styles.input}
+                placeholder="ชื่ออุปกรณ์"
+                placeholderTextColor="gray"
+                onChangeText={text => setDeviceName(text)}
+                value={deviceName}
+              />
+
+              {/* <TextInput
+                style={styles.input}
+                placeholder="ชื่อ WiFi"
+                placeholderTextColor="gray"
+                onChangeText={text => setWifiName(text)}
+                value={wifiName}
+              />
+
+              <TextInput
+                style={styles.input}
+                placeholder="รหัสผ่าน WiFi"
+                placeholderTextColor="gray"
+                onChangeText={text => setWifiPassword(text)}
+                value={wifiPassword}
+                secureTextEntry={false} // แสดงเป็นตัวอักษรที่ถูกซ่อน
+              /> */}
+              
+              {/* <Text style={styles.buttonText1}>หมายเหตุ: อุปกรณ์จะเชื่อมต่อกับ WiFi ที่ผู้ใช้กรอกอัตโนมัติ</Text> */}
+              <Text style={styles.buttonText1}>หมายเหตุ: ตั้งชื่ออุปกรณ์ตามต้องการ ไม่มีผลต่อการทำงาน</Text>
+              <View style={styles.buttonContainer}>
+                {/* <TouchableOpacity style={[styles.button, styles.saveButton]} onPress={handleSaveDevice}>
                 <Text style={styles.buttonText}>บันทึก</Text>
               </TouchableOpacity>
               <TouchableOpacity style={[styles.button, styles.cancelButton]} onPress={() => setIsModalVisible(false)}>
                 <Text style={styles.buttonText}>ยกเลิก</Text>
               </TouchableOpacity> */}
-              <TouchableOpacity style={[styles.saveButton]} onPress={handleSaveDevice}>
-                <LinearGradient
-                  style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
-                  locations={[0, 1]}
-                  colors={["#92A3FD", "#9DCEFF"]}
-                />
-                <Text style={styles.buttonText}>บันทึก</Text>
-              </TouchableOpacity>
+                <TouchableOpacity style={[styles.cancelButton]} onPress={handleCancel}>
+                  <LinearGradient
+                    style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
+                    locations={[0, 1]}
+                    colors={["#C58BF2", "#EEA4CE"]}
+                  />
+                  <Text style={styles.buttonText}>ยกเลิก</Text>
+                </TouchableOpacity>
 
-              <TouchableOpacity style={[styles.cancelButton]} onPress={() => handleCancel()}>
-                <LinearGradient
-                  style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
-                  locations={[0, 1]}
-                  colors={["#C58BF2", "#EEA4CE"]}
-                />
-                <Text style={styles.buttonText}>ยกเลิก</Text>
-              </TouchableOpacity>
+                <TouchableOpacity style={[styles.saveButton]} onPress={() => handleSaveDevice() }>
+                  <LinearGradient
+                    style={[styles.buttonLargeRegisterChild, styles.labelChildPosition]}
+                    locations={[0, 1]}
+                    colors={["#92A3FD", "#9DCEFF"]}
+                  />
+                  <Text style={styles.buttonText}>บันทึก</Text>
+                </TouchableOpacity>
 
+              </View>
             </View>
           </View>
-        </View>
-      </Modal>
+        </Modal>
 
-    </ScrollView>
+      </ScrollView>
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
+  container: {
+    flexGrow: 1,
+    // alignItems: 'center',
+    // justifyContent: 'center',
+  },
+  scrollContainer: {
+    flexGrow: 1,
+  },
   buttonLargeRegister: {
     top: 20,
-    // left: 70,
     shadowColor: "rgba(149, 173, 254, 0.3)",
     shadowOffset: {
       width: 0,
@@ -333,17 +450,16 @@ const styles = StyleSheet.create({
     textAlign: "center",
     position: "absolute",
   },
-  container: {
-    flexGrow: 1,
-    // alignItems: 'center',
-    // justifyContent: 'center',
-  },
   title: {
     fontSize: 24,
     fontWeight: 'bold',
     marginBottom: 5,
     marginTop: 15,
     marginLeft: 15,
+  },
+  iconContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   deviceContainer: {
     flexDirection: 'row',
@@ -352,8 +468,21 @@ const styles = StyleSheet.create({
     backgroundColor: '#ffff',
     borderRadius: 10,
     width: '90%',
-    height: '15%',
+    height: 90, // ปรับความสูงของอุปกรณ์ตามต้องการ
     marginLeft: 20,
+  },
+  deviceNameStatus: {
+    // backgroundColor: 'red',
+    width: 295,
+    height: 70,
+    flexDirection: 'row',
+    justifyContent: 'flex-start',
+    alignItems: 'center',
+  },
+  deviceButton: {
+    // backgroundColor: 'red',
+    marginLeft: -10,
+    marginTop: 10
   },
   deviceImage: {
     width: 50,
@@ -367,9 +496,9 @@ const styles = StyleSheet.create({
   },
   statusText: {
     fontSize: 16,
-    top:5, // เพิ่มระยะห่างระหว่างชื่ออุปกรณ์กับสถานะ
+    top: 5, // เพิ่มระยะห่างระหว่างชื่ออุปกรณ์กับสถานะ
   },
-  
+
   onlineText: {
     color: 'green',
 
@@ -389,6 +518,10 @@ const styles = StyleSheet.create({
   emptyImage: {
     width: 100,
     height: 100,
+  },
+  workoutbtn: {
+    width: 50,
+    height: 50,
   },
   addButton: {
     backgroundColor: 'blue',
@@ -415,7 +548,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     elevation: 5,
     alignItems: 'center',
-    height: "45%",
+    // height: "45%",
+    height: "30%",
     width: "87%",
   },
   modalTitle: {

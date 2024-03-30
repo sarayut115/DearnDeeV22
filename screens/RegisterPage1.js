@@ -171,7 +171,7 @@ const RegisterPage1 = () => {
         <View style={[styles.label, styles.labelLayout]}>
           <View style={[styles.labelBg, styles.labelChildPosition]}>
             <TouchableOpacity
-              style={[styles.labelBgChild, styles.childLayout]}
+              style={[styles.labelBgChild]}
               onPress={() => {
                 nameInputRef.current.focus();
               }}
@@ -198,6 +198,7 @@ const RegisterPage1 = () => {
               ref={nameInputRef}
               style={[styles.firstName, styles.nameTypo]}
               placeholder="ชื่อ"
+              placeholderTextColor={Color.gray2} // กำหนดสีของ placeholder เป็นเทา
               value={firstName}
               onChangeText={(text) => setFirstName(text)}
             />
@@ -330,7 +331,7 @@ const RegisterPage1 = () => {
             checkedColor={Color.blackColor}
             containerStyle={styles.privacyPolicyChild}
           />
-          <Text style={[styles.text7, styles.nameTypo]}>
+          <Text style={[styles.text7, styles.nameTypo1]}>
             {`การดำเนินการต่อแสดงว่าคุณยอมรับ `}
             <TouchableOpacity style={styles.privacy} onPress={() => navigation.navigate("PrivacyPolicyScreen")}>
               <Text style={styles.text8}>
@@ -487,6 +488,12 @@ const styles = StyleSheet.create({
     position: "absolute",
   },
   nameTypo: {
+    color: Color.black,
+    textAlign: "left",
+    fontFamily: FontFamily.textSmallTextRegular,
+    position: "absolute",
+  },
+  nameTypo1: {
     color: Color.gray2,
     textAlign: "left",
     fontFamily: FontFamily.textSmallTextRegular,
@@ -644,7 +651,7 @@ const styles = StyleSheet.create({
     padding: 0,
   },
   text8: {
-    color: Color.gray2,
+    color: Color.black,
     textDecorationLine: "underline", // This applies underline
     fontSize:10
   },

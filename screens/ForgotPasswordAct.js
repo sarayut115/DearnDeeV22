@@ -6,10 +6,10 @@ import { useNavigation } from "@react-navigation/native";
 import { FontFamily, FontSize, Color, Border } from "../GlobalStyles";
 import { firebase } from '../config';
 
-const ForgotPassword = () => {
+const ForgotPasswordAct = ({ route }) => {
   const navigation = useNavigation();
   const auth = firebase.auth();
-  const [email, setEmail] = useState(''); // รับอีเมลผ่านพารามิเตอร์
+  const [email, setEmail] = useState(route.params.email || ''); // รับอีเมลผ่านพารามิเตอร์
   const emailInputRef = useRef(null);
   const handleResetPassword = () => {
     if (!email) {
@@ -20,7 +20,7 @@ const ForgotPassword = () => {
     auth.sendPasswordResetEmail(email)
       .then(() => {
         alert('อีเมลสำหรับรีเซ็ตรหัสผ่านถูกส่งไปยังอีเมลของคุณแล้ว');
-        navigation.goBack(); // หรือใช้ navigation.navigate('LoginPage') หากต้องการนำกลับไปที่หน้าเข้าสู่ระบบ
+        navigation.navigate('Safety'); // หรือใช้ navigation.navigate('LoginPage') หากต้องการนำกลับไปที่หน้าเข้าสู่ระบบ
       })
       .catch(error => alert(error.message));
   };
@@ -96,7 +96,7 @@ const ForgotPassword = () => {
       </TouchableOpacity>
       <Pressable
         style={styles.arrowLeft}
-        onPress={() => navigation.navigate("LoginPage")}
+        onPress={() => navigation.navigate("Safety")}
       >
         <Image
           style={[styles.icon, styles.iconLayout]}
@@ -321,4 +321,4 @@ const styles = StyleSheet.create({
   
 });
 
-export default ForgotPassword;
+export default ForgotPasswordAct;
